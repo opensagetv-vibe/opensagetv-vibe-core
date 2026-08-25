@@ -1,0 +1,6 @@
+/output/
+/buildoutput/
+/.gradle/
+*.tar
+*.zip
+
