@@ -1034,3 +1034,7 @@ native/SageWorkspace.VC.VC.opendb
 /nbproject/private/
 /nbbuild/
 /dist/
+output/
+third_party/ffmpeg/**/*.d
+third_party/ffmpeg/**/*.so
+third_party/ffmpeg/**/*.so.*
