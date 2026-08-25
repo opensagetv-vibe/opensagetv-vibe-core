@@ -2,6 +2,14 @@
 
 ## Next
 
+* Added a single Ubuntu 26.04/OpenJDK 11 Docker development environment for clean compilation, testing, diagnostics, packaging, and server smoke runs.
+* Modernized `libImageLoader.so` to use Ubuntu libpng16, current PNG transformations, transformed channel/row metadata, explicit SageTV pixel conversion, and contained libpng error handling.
+* Added RGB, RGBA, palette, grayscale, grayscale-alpha, tRNS, 16-bit, channel-logo analogue, malformed-file, and global-symbol-preemption ImageLoader regressions.
+* Added amd64 ELF dependency inspection and required JNI export validation across every produced Linux shared library.
+* Updated native code for current GCC/glibc headers, callback and pthread signatures, 64-bit handles, C prototypes, giflib 5, FreeType, and other compile-blocking ABI/type changes.
+* Added same-container server startup and repeated shutdown tests plus deterministic artifact collection and `output/BUILD_REPORT.md`.
+* Added LF policy for Unix `configure` scripts so Windows Docker Desktop checkouts remain executable in Linux containers.
+
 ## Version 9.2.10 (2025-04-04)
 * SD EPG changes to correct Error 6000, 4009 and some other login issues with SD
 

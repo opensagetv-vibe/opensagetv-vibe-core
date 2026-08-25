@@ -2,6 +2,10 @@
 
 For the reproducible Ubuntu 26.04 server build, tests, package, and same-container smoke run, see [docs/UBUNTU26_BUILD.md](docs/UBUNTU26_BUILD.md) and run `./sagetv-dev.sh all`.
 
+Docker Desktop on Windows (PowerShell) can invoke the same LF-safe entry point with `wsl bash ./sagetv-dev.sh all`, or run it from a Git/WSL shell. On Linux, run it directly. Set this checkout's Git policy to `git config core.autocrlf false`; `.gitattributes` protects executable build files.
+
+Do not compile on a low-power Unraid host. Build and validate on another amd64 Docker machine, transfer the release archive or saved OCI image, verify its SHA-256 checksum, then load it with `docker load`. The container repository supplies the exact transfer and commissioning workflow; Core never reads or migrates an existing Unraid appdata directory.
+
 The gradle.build build file can be used to recreate the Sage.jar and/or the MiniClient.jar on Windows, Linux or Mac.
 
 After cloning the repository, you can re-create the Sage.jar by running the **sageJar** task
