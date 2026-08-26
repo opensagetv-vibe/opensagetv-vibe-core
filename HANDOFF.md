@@ -5,10 +5,15 @@
 - Base: `ubuntu:26.04` (`resolute`)
 - Architecture: Linux amd64
 - Java: Ubuntu OpenJDK 11
-- Builder tag used locally: `opensagetv-core-builder:u26-j11`
+- Unified builder tag used locally: `opensagetv-build-env:u26-j11`
+- Reusable development container: `opensagetv-dev`
 - Verification: `./sagetv-dev.sh all`
 
 The latest clean run completed Java tests, all native builds, dependency/JNI checks, PNG format and symbol-preemption regressions, malformed-PNG containment, packaging, server startup, and repeated shutdown. The generated report is `output/BUILD_REPORT.md`.
+
+Core's `sagetv-dev.sh` delegates to the sibling build-environment wrapper. Keep
+`opensagetv-dev` as the only development container; do not reintroduce
+phase-specific or Core-only containers.
 
 ## Important decisions
 

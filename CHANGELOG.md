@@ -2,6 +2,8 @@
 
 ## Ubuntu 26 modernization
 
+- Changed `sagetv-dev.sh` to reuse the unified `opensagetv-dev` build container
+  instead of creating and rebuilding a separate Core-only container.
 - Discover an installed `xmltv.XMLTVImportPlugin` when the EPG import property
   is empty, and fall back to it when an obsolete configured importer cannot be
   loaded. This prevents the open-source server from entering the retired

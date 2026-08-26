@@ -2,6 +2,11 @@
 
 For the reproducible Ubuntu 26.04 server build, tests, package, and same-container smoke run, see [docs/UBUNTU26_BUILD.md](docs/UBUNTU26_BUILD.md) and run `./sagetv-dev.sh all`.
 
+The Core wrapper delegates to the sibling `opensagetv-build-env` repository
+and reuses its single named `opensagetv-dev` container. It does not create a
+second Core-only development container. Rebuild the unified image only when
+Docker build dependencies change; source edits are bind-mounted.
+
 Docker Desktop on Windows (PowerShell) can invoke the same LF-safe entry point with `wsl bash ./sagetv-dev.sh all`, or run it from a Git/WSL shell. On Linux, run it directly. Set this checkout's Git policy to `git config core.autocrlf false`; `.gitattributes` protects executable build files.
 
 Do not compile on a low-power Unraid host. Build and validate on another amd64 Docker machine, transfer the release archive or saved OCI image, verify its SHA-256 checksum, then load it with `docker load`. The container repository supplies the exact transfer and commissioning workflow; Core never reads or migrates an existing Unraid appdata directory.
