@@ -47,6 +47,7 @@ public final class EPG implements Runnable
   private static final String ACCESS_CODE = "access_code";
   private static final String ZIP_CODE = "zip_code";
   private static final String EPG_IMPORT_PLUGIN = "epg_import_plugin";
+  private static final String DEFAULT_XMLTV_IMPORT_PLUGIN = "xmltv.XMLTVImportPlugin";
   private static final String AUTODIAL = "autodial";
   private static final long ERROR_SLEEP = 1800000L;
   static final long MAINTENANCE_FREQ = Sage.MILLIS_PER_DAY;
@@ -205,7 +206,7 @@ public final class EPG implements Runnable
 
   private void updateEPGPluginObj()
   {
-    String epgImportPluginName = Sage.get(prefs + EPG_IMPORT_PLUGIN, "").replaceAll(" ", ""); // bugfix for nielm because this is a common config error;
+    String epgImportPluginName = getEPGImportPluginName();
     if (epgImportPluginName.length() > 0 && (epgImportPlugin == null || !epgImportPluginName.equals(epgPluginString)))
     {
       epgImportPlugin = null;
@@ -216,8 +217,27 @@ public final class EPG implements Runnable
       catch (Throwable e)
       {
         if (Sage.DBG) System.out.println("Error loading EPG Import Plugin of:" + e);
-        if (Sage.DBG) System.out.println("DISABLING EPG IMPORT PLUGIN SINCE IT FAILS LOADING!!!");
-        Sage.put(prefs + EPG_IMPORT_PLUGIN, epgImportPluginName= "");
+        // An obsolete or misspelled property must not hide an installed XMLTV
+        // importer and route setup through the retired licensed EPG service.
+        if (!DEFAULT_XMLTV_IMPORT_PLUGIN.equals(epgImportPluginName) && isImportPluginInstalled(DEFAULT_XMLTV_IMPORT_PLUGIN))
+        {
+          try
+          {
+            epgImportPluginName = DEFAULT_XMLTV_IMPORT_PLUGIN;
+            epgImportPlugin = (EPGImportPlugin) Class.forName(epgImportPluginName, true, Sage.extClassLoader).newInstance();
+            Sage.put(prefs + EPG_IMPORT_PLUGIN, epgImportPluginName);
+            if (Sage.DBG) System.out.println("Using installed XMLTV EPG Import Plugin instead.");
+          }
+          catch (Throwable fallbackError)
+          {
+            if (Sage.DBG) System.out.println("Error loading XMLTV EPG Import Plugin of:" + fallbackError);
+          }
+        }
+        if (epgImportPlugin == null)
+        {
+          if (Sage.DBG) System.out.println("DISABLING EPG IMPORT PLUGIN SINCE IT FAILS LOADING!!!");
+          Sage.put(prefs + EPG_IMPORT_PLUGIN, epgImportPluginName = "");
+        }
       }
       epgPluginString = epgImportPluginName;
     }
@@ -226,6 +246,31 @@ public final class EPG implements Runnable
       epgPluginString = epgImportPluginName;
       if (epgPluginString.length() == 0)
         epgImportPlugin = null;
+    }
+  }
+
+  private String getEPGImportPluginName()
+  {
+    String pluginName = Sage.get(prefs + EPG_IMPORT_PLUGIN, "").replaceAll(" ", ""); // tolerate a common configuration error
+    if (pluginName.length() == 0 && isImportPluginInstalled(DEFAULT_XMLTV_IMPORT_PLUGIN))
+    {
+      pluginName = DEFAULT_XMLTV_IMPORT_PLUGIN;
+      Sage.put(prefs + EPG_IMPORT_PLUGIN, pluginName);
+      if (Sage.DBG) System.out.println("Discovered installed XMLTV EPG Import Plugin.");
+    }
+    return pluginName;
+  }
+
+  private boolean isImportPluginInstalled(String className)
+  {
+    try
+    {
+      Class.forName(className, false, Sage.extClassLoader);
+      return true;
+    }
+    catch (Throwable e)
+    {
+      return false;
     }
   }
 
@@ -1682,7 +1727,7 @@ public final class EPG implements Runnable
     return rv;
   }
 
-  public boolean hasEPGPlugin() { return Sage.get(prefs + EPG_IMPORT_PLUGIN, "").length() > 0; }
+  public boolean hasEPGPlugin() { return getEPGImportPluginName().length() > 0; }
 
   boolean pluginExtractGuide(String providerID)
   {

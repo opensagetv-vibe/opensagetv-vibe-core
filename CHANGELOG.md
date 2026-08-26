@@ -1,7 +1,17 @@
 # Change Log
 
+## Ubuntu 26 modernization
+
+- Discover an installed `xmltv.XMLTVImportPlugin` when the EPG import property
+  is empty, and fall back to it when an obsolete configured importer cannot be
+  loaded. This prevents the open-source server from entering the retired
+  license-key EPG path merely because the optional XMLTV JAR was installed
+  before its property was configured.
+
 ## Next
 
+* Canonicalized discovered network encoders by numeric source IP instead of reverse-DNS hostname, preventing duplicate OpenDCT tuners such as `Tower:9000` and `192.168.10.175:9000` after restarts.
+* Restored MiniClient discovery replies to the original single UDP socket, allowing the kernel to choose the correct response address on Docker host, macvlan, and Unraid ipvlan/br0 networks. This removes the competing same-port response socket that could lose broadcasts or retain a stale address after a network-mode change.
 * Added a single Ubuntu 26.04/OpenJDK 11 Docker development environment for clean compilation, testing, diagnostics, packaging, and server smoke runs.
 * Modernized `libImageLoader.so` to use Ubuntu libpng16, current PNG transformations, transformed channel/row metadata, explicit SageTV pixel conversion, and contained libpng error handling.
 * Added RGB, RGBA, palette, grayscale, grayscale-alpha, tRNS, 16-bit, channel-logo analogue, malformed-file, and global-symbol-preemption ImageLoader regressions.

@@ -23,3 +23,8 @@ See [`BUILDING.md`](BUILDING.md), [`docs/UBUNTU26_BUILD.md`](docs/UBUNTU26_BUILD
 - `output/logs/` — build and smoke-test logs
 
 Generated output is deliberately not committed. Runtime images consume a pinned package produced from this source; they do not download an unpinned `latest` release.
+
+When the optional XMLTV importer JAR is installed, Core discovers
+`xmltv.XMLTVImportPlugin` even if the EPG import property is missing or contains
+an obsolete class name. XMLTV setup therefore does not require a historical
+SageTV EPG license key.
