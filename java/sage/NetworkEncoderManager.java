@@ -130,7 +130,11 @@ public class NetworkEncoderManager implements CaptureDeviceManager
                 si.port = ((data[6] & 0xFF) << 8) + (data[7] & 0xFF);
                 int descLength = (data[8] & 0xFF);
                 si.name = new String(data, 9, descLength, Sage.I18N_CHARSET);
-                si.address = pack.getAddress().getHostName();
+                // Network encoder identity must not depend on reverse DNS.
+                // The same server may resolve to a hostname on one startup and
+                // remain numeric on another, causing SageTV to create a second
+                // complete set of encoders. Use the stable packet source IP.
+                si.address = pack.getAddress().getHostAddress();
                 if (Sage.DBG) System.out.println("Added server info:" + si);
                 servers.add(si);
               }
