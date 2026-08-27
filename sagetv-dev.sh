@@ -2,12 +2,12 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-UNIFIED_WRAPPER="${OPENSAGETV_BUILD_WRAPPER:-$ROOT/../opensagetv-build-env/opensagetv-dev.sh}"
-CONTAINER="${OPENSAGETV_DEV_CONTAINER:-opensagetv-dev}"
+UNIFIED_WRAPPER="${OPENSAGETV_VIBE_BUILD_WRAPPER:-$ROOT/../opensagetv-vibe-build-env/opensagetv-vibe-dev.sh}"
+CONTAINER="${OPENSAGETV_VIBE_DEV_CONTAINER:-opensagetv-vibe-dev}"
 
 if [[ ! -x "$UNIFIED_WRAPPER" ]]; then
   echo "Unified build wrapper not found: $UNIFIED_WRAPPER" >&2
-  echo "Place opensagetv-core beside opensagetv-build-env or set OPENSAGETV_BUILD_WRAPPER." >&2
+  echo "Place opensagetv-vibe-core beside opensagetv-vibe-build-env or set OPENSAGETV_VIBE_BUILD_WRAPPER." >&2
   exit 2
 fi
 

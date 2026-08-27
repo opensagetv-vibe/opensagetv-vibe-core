@@ -2,8 +2,8 @@
 
 For the reproducible Ubuntu 26.04 server build, tests, package, and same-container smoke run, see [docs/UBUNTU26_BUILD.md](docs/UBUNTU26_BUILD.md) and run `./sagetv-dev.sh all`.
 
-The Core wrapper delegates to the sibling `opensagetv-build-env` repository
-and reuses its single named `opensagetv-dev` container. It does not create a
+The Core wrapper delegates to the sibling `opensagetv-vibe-build-env`
+repository and reuses its single named `opensagetv-vibe-dev` container. It does not create a
 second Core-only development container. Rebuild the unified image only when
 Docker build dependencies change; source edits are bind-mounted.
 

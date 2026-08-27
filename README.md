@@ -1,4 +1,4 @@
-# OpenSageTV Core — Ubuntu 26 / Java 11
+# OpenSageTV Vibe Core — Ubuntu 26 / Java 11
 
 This repository preserves SageTV's upstream history and contains the modernized Linux server source. The default development target is Ubuntu 26.04, amd64, and OpenJDK 11. The historical directory guide remains in [`README`](README).
 
