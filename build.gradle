@@ -408,10 +408,10 @@ task(restoreSageConstants) {
 
 // task dependencies
 compileJava.dependsOn updateBuildNumber
+compileJava.finalizedBy restoreSageConstants
 sageJar.dependsOn cleanSageJar, classes, test
 miniclientJar.dependsOn clean, miniclientClasses, cleanMiniJar
 linuxMiniClientRelease.dependsOn miniclientJar
-sageJar.finalizedBy restoreSageConstants
 
 // Eclipse project setup
 eclipse {

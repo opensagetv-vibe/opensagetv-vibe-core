@@ -2,10 +2,13 @@
 
 ## Ubuntu 26 modernization
 
-- Made the Gradle build-number restore remove its temporary
-  `SageConstants.java.bak` immediately and fail if cleanup is impossible. This
-  prevents a stale ignored backup from changing tracked source on a later
-  bind-mounted build.
+- Made every `compileJava` invocation restore the temporary build-number
+  change and remove `SageConstants.java.bak` immediately, failing if cleanup
+  is impossible. This covers direct test builds as well as `sageJar` and
+  prevents stale ignored backups from changing tracked source later.
+- Disabled documentation generation in the private legacy FFmpeg-minimal
+  dependency build so clean native builds do not leave untracked manuals in
+  the source checkout.
 - Renamed the project and unified development environment references to the
   full `opensagetv-vibe-*` namespace without changing SageTV, JNI, or package
   ABI names.

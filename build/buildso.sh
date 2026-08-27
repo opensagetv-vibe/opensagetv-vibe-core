@@ -74,6 +74,7 @@ make clean
   --enable-parser=mpegaudio \
   --enable-protocol=pipe --enable-protocol=http --enable-protocol=file --enable-protocol=stv \
   --enable-pthreads \
+  --disable-doc \
   --disable-ffmpeg --disable-ffprobe --disable-ffserver --disable-ffplay \
   --disable-demuxer=ea || { echo "Build failed, exiting."; exit 1; }
 make -j32 || { echo "Build failed, exiting."; exit 1; }
