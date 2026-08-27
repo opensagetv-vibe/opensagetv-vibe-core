@@ -15,6 +15,12 @@ Core's `sagetv-dev.sh` delegates to the sibling build-environment wrapper. Keep
 `opensagetv-vibe-dev` as the only development container; do not reintroduce
 phase-specific or Core-only containers.
 
+The `.gitattributes` LF rules for `build/serverfiles/*`, Debian maintainer
+scripts, and extensionless third-party build helpers are runtime/build
+requirements. In particular, a Windows fresh clone otherwise packages a CRLF
+`startsagecore`; Linux then reports the existing launcher as `No such file or
+directory` because its shebang names `bash\r`.
+
 ## Important decisions
 
 `libImageLoader.so` intentionally links Ubuntu's `libpng16.so.16`; it does not export an embedded `png_*` implementation. `LoadPNG` normalizes transformed input before inspecting channel/row sizes and contains libpng errors with `setjmp` cleanup so corrupt images cannot abort the JVM.

@@ -2,6 +2,10 @@
 
 ## Ubuntu 26 modernization
 
+- Enforced LF checkout for the extensionless SageTV server launchers, Debian
+  maintainer scripts, and common bundled third-party build helpers. Fresh
+  Windows clones can now package and execute `startsagecore` without the Linux
+  loader misreading a CRLF shebang as a missing interpreter.
 - Made every `compileJava` invocation restore the temporary build-number
   change and remove `SageConstants.java.bak` immediately, failing if cleanup
   is impossible. This covers direct test builds as well as `sageJar` and
