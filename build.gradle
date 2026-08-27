@@ -399,7 +399,9 @@ task(restoreSageConstants) {
     if (fileBak.exists()) {
       file.text = fileBak.text
       System.out.println("Restored ${file}");
-      fileBak.deleteOnExit()
+      if (!fileBak.delete()) {
+        throw new GradleException("Unable to remove build-number backup ${fileBak}")
+      }
     }
   }
 }
@@ -506,4 +508,3 @@ Source code for SageTV:  https://github.com/google/sagetv
 
 // This get run when you call ./gradlew without any targets
 defaultTasks 'sageJar'
-
