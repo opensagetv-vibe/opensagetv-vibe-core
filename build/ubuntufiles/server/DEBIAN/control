@@ -5,7 +5,7 @@ Installed-Size: 33308
 Maintainer: Jean Francois <jeanfrancois@sagetv.com>
 Uploaders: Sean Stuckless <sean.stuckless@gmail.com>
 Changed-By: Sean Stuckless <sean.stuckless@gmail.com>
-Vcs-Browser: https://github.com/google/sagetv
+Vcs-Browser: https://github.com/opensagetv-vibe/opensagetv-vibe-core
 Architecture: DEB_ARCH
 Version: MAJOR_VERSION.MINOR_VERSION.MICRO_VERSION
 Depends: java7-runtime | java7-sdk | debconf (>= 0.2.17), net-tools

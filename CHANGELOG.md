@@ -1,5 +1,84 @@
 # Change Log
 
+## Unreleased
+
+- Preserved this repository as the `opensagetv-vibe-core` GitHub fork of
+  `OpenSageTV/sagetv`, documented upstream/release boundaries, indexed bundled
+  third-party licenses, and replaced the inherited Ubuntu 22/legacy deployment
+  workflow with read-only repository checks. GitHub branch builds can no longer
+  publish to or tag the historical project.
+- Disabled the inherited `build/deploy.sh` publisher and redirected dormant
+  manual Gradle release metadata and Debian source links to this fork, removing
+  active publication targets for the historical repositories.
+- Made the bundled x264 version helper tolerate the standard fork remote layout
+  (`origin` for the fork and `upstream` for the parent) instead of printing a
+  fatal `origin/master` lookup during otherwise successful clean builds.
+- Added strict server-network gates for the MiniClient UDP discovery response,
+  TCP service port, SageTV/OpenDCT `AUTOINFOSCAN` source contract, and an
+  optional commissioned OpenDCT endpoint. On 2026-09-05 the commissioned
+  protocol-3.0 endpoint returned real channel data across all queried scan
+  indexes.
+- Added opt-in MiniClient playback-rate negotiation through
+  `VIBE_PLAYBACK_RATE` and media command 30. Supporting Pull clients receive
+  SageTV's existing Smooth FF/REW rate sequence; clients that omit or reject
+  the property retain the established one-shot seek fallback. Empty and
+  whitespace-only replies fail closed, and focused compatibility tests cover
+  capability parsing.
+- Added per-client DISC policy negotiation for Native, Hybrid, and MIM main
+  feature, including skip-menu, skip-preview, and native-fallback preferences.
+  Unavailable explicit Hybrid/MIM requests now fail closed when fallback is
+  disabled instead of entering a partial MiniDVDPlayer session.
+- Added deterministic DVD main-feature selection to the Java/Ogle VM by
+  measuring the first referenced PGC duration for each authored title. Skip
+  menus starts that longest title; skip previews remains a separate root-menu
+  operation.
+
+- Added negotiated remote DVD selection for clients advertising
+  `DVD_REMOTE_NAV`, while preserving Windows local `DShowDVDPlayer` and legacy
+  client behavior. Disc-root/`VIDEO_TS` normalization and focused tests cover
+  authored and menu-less directory inputs. The Vibe from-beginning event now
+  suppresses a saved resume only for its matching DVD/Blu-ray load, leaving
+  ordinary STV resume unchanged. Real Amazon Fire TV commissioning passed the
+  existing Java/Ogle `MiniDVDPlayer` path for authored and menu-less fixtures.
+- Clamp DVD/Blu-ray seek time to zero before it reaches `MiniDVDPlayer` and the
+  Java/Ogle VM. A Skip Back interval larger than the elapsed title time
+  previously produced a negative PTS/sector, flushed the remote decoder, and
+  left the session without replacement media. Added a focused TestNG regression;
+  the exact Fire TV `ff_2`/`rew_2`, FF/PLAY, REW/PLAY, and chapter sequence now
+  passes strict audio/video output recovery.
+
+- Made the SageTV STV the authoritative closed-caption controller for Vibe
+  MiniClients. `MiniPlayer` now retains its current CC state and forwards it as
+  `VIDEO_CC_STATE` after media load and whenever the STV changes it. Unknown
+  properties remain safely rejected by older MiniClients. Added a focused
+  TestNG state regression; Media3 and legacy ExoPlayer physically rendered
+  captions without using Android's debug subtitle selector.
+- Extended the negotiated Vibe media-state URL with authoritative channel
+  identity. Android hardware-in-loop tests can now distinguish an already
+  active healthy channel from a failed switch without changing URLs sent to
+  older MiniClients.
+- Added opt-in MiniClient exact-channel event `231`, guarded by
+  `miniclient/enable_vibe_channel_set_event=false`. It validates bounded dotted
+  channel numbers and tunes only the requesting UI context. Physical 2.1/5.1
+  stress tests passed across Media3, legacy ExoPlayer, and four GSY engines.
+- Reload the current live file when exact-channel event 231 requests the
+  already-selected channel. This gives a newly reconnected MiniClient a fresh
+  Fixed stream instead of acknowledging an expired prior stream.
+- Added an opt-in Vibe MiniClient exact-path event (`230`) for deterministic
+  hardware-in-loop tests. It validates and resolves only indexed playable
+  `MediaFile` paths and starts playback in the requesting UI context. Event
+  `232` uses the same bounded path contract and queues the first segment time
+  directly behind `Watch`, preventing resume-near-EOF test starts. Both enter
+  the canonical `MediaPlayer OSD` on the UI event thread; using the toggle-like
+  `TV` event here caused an MCP verification race that returned playback to
+  the Main Menu preview. The feature defaults off through
+  `miniclient/enable_vibe_watch_file_event=false`.
+- Made that event wait for the newly connected UI's VideoFrame worker before
+  calling `watch()`. This removes a reconnect race that could dereference an
+  uninitialized Seeker and leave an accepted request on Main Menu.
+- Added the common AI takeover, task, changed-files update, resumable gate, and
+  handoff ZIP workflow while retaining the existing unified Core build.
+
 ## Ubuntu 26 modernization
 
 - Enforced LF checkout for the extensionless SageTV server launchers, Debian
@@ -26,7 +105,7 @@
 
 ## Next
 
-* Canonicalized discovered network encoders by numeric source IP instead of reverse-DNS hostname, preventing duplicate OpenDCT tuners such as `Tower:9000` and `192.168.10.175:9000` after restarts.
+* Canonicalized discovered network encoders by numeric source IP instead of reverse-DNS hostname, preventing duplicate OpenDCT tuners such as `encoder-host:9000` and `192.0.2.10:9000` after restarts.
 * Restored MiniClient discovery replies to the original single UDP socket, allowing the kernel to choose the correct response address on Docker host, macvlan, and Unraid ipvlan/br0 networks. This removes the competing same-port response socket that could lose broadcasts or retain a stale address after a network-mode change.
 * Added a single Ubuntu 26.04/OpenJDK 11 Docker development environment for clean compilation, testing, diagnostics, packaging, and server smoke runs.
 * Modernized `libImageLoader.so` to use Ubuntu libpng16, current PNG transformations, transformed channel/row metadata, explicit SageTV pixel conversion, and contained libpng error handling.

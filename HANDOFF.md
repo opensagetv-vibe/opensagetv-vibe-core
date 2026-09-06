@@ -1,5 +1,27 @@
 # Core handoff
 
+## Repository identity
+
+- GitHub repository: `opensagetv-vibe/opensagetv-vibe-core`
+- Fork parent: `OpenSageTV/sagetv`
+- Historical source lineage: `google/sagetv`
+- Local modernization branch: `ubuntu26-modern-build`
+- `origin`: writable Vibe fork
+- `upstream`: read-only original OpenSageTV repository
+
+The fork exists publicly with its inherited `master` branch. The local
+modernization work must remain on `ubuntu26-modern-build` until its complete
+source, Docker, test, package, and independent-checkout gates pass. Do not push
+to the original OpenSageTV repository and do not invoke the inherited legacy
+deployment script from CI.
+
+## Standard takeover
+
+Read `AGENTS.md`, `README.md`, `TASKS.md`, and `WORKFLOW.md`, then use the root
+`dev`, `update`, and handoff-package commands. Packages are exchanged only
+through `artifacts/downloads`; Core installation into an image belongs to the
+container repository.
+
 ## Verified baseline
 
 - Base: `ubuntu:26.04` (`resolute`)
@@ -10,6 +32,74 @@
 - Verification: `./sagetv-dev.sh all`
 
 The latest clean run completed Java tests, all native builds, dependency/JNI checks, PNG format and symbol-preemption regressions, malformed-PNG containment, packaging, server startup, and repeated shutdown. The generated report is `output/BUILD_REPORT.md`.
+
+The 2026-09-05 publication audit also passed the live OpenDCT protocol-3.0
+`AUTOINFOSCAN` integration against the commissioned HDHomeRun-backed endpoint,
+which returned real channel rows. Core now runs that test strictly whenever
+`OPENDCT_TEST_HOST`, `OPENDCT_TEST_PORT`, and `OPENDCT_TEST_ENCODER` are supplied;
+without all three it records the physical endpoint as `SKIPPED`. Server smoke
+testing also verifies the UDP MiniClient discovery reply and TCP service port.
+
+The clean post-DISC-policy build produced `build/release/Sage.jar` SHA-256
+`fe4a97f265a942e0019e457b1588b8581c9f77d7394ac2909aaa8116431cb33a`;
+its `output/BUILD_REPORT.md` records PASS for Java/tests, every required native
+library, JNI/ELF, system-libpng PNG regressions, malformed-input containment,
+server startup, and repeated shutdown.
+
+Core now negotiates `VIBE_PLAYBACK_RATE` after the existing DISC properties.
+Only a non-empty client reply enables MiniPlayer command 30 for Pull Smooth
+FF/REW; older clients keep the historical one-shot seek behavior. The focused
+compatibility test and `sageJar` task pass. The commissioned Vibe test server
+currently runs `Sage.jar` SHA-256
+`32563ce0ae9e174b1212a9c7fa0bb4255483bc81410276ab78e3e2d311683c48`.
+
+Core now makes the SageTV STV caption state authoritative for supporting Vibe
+MiniClients. `MiniPlayer.setClosedCaptioningState()` retains the state and sends
+`VIDEO_CC_STATE`; Android maps Off/On to decoder track state. Both Exo backends
+passed physical caption rendering with the Android debug selector unused.
+
+Core now selects its existing Java/Ogle `MiniDVDPlayer` for a remote client
+that negotiates `DVD_REMOTE_NAV`, without changing Windows local
+`DShowDVDPlayer`. `Wizard` normalizes a disc root and `VIDEO_TS` consistently,
+and Vibe's explicit from-beginning event suppresses the saved resume only for
+the matching disc load. Focused tests and real authored/menu-less Fire TV
+commissioning pass. The commissioned share contains no BDMV fixture, so
+Blu-ray physical validation is SKIPPED and must not be represented as passing.
+DVD/Blu-ray seek time is now clamped to zero before entering the Java/Ogle VM;
+this fixes remote Skip Back near title start passing a negative sector and
+stalling after FLUSH. The focused Core test and the complete physical Fire TV
+transport sequence pass. The isolated Unraid test server currently runs the
+rebuilt `Sage.jar` SHA-256
+`3ac9592dcfbf10cd65a72f91334ea663a979afcb153d1b1f8deaab2829b818bc`.
+It also negotiates client DISC policy, native fallback, skip menus, and skip
+previews; skip menus selects the longest authored VM title. The preceding JARs
+remain available as `Sage.jar.backup-before-disc-seek-20260901` and
+`Sage.jar.backup-before-disc-fail-closed-20260901`.
+
+Core also contains opt-in MiniClient events 230 and 232 for exact indexed-file playback
+during hardware-in-loop testing. It is gated by
+`miniclient/enable_vibe_watch_file_event`, rejects invalid/NUL/oversized and
+unindexed paths, calls `VideoFrame.watch()` only in the requesting UI context,
+and enters `MediaPlayer OSD` directly on the UI event thread. Event 232 queues
+the first media-segment time behind `Watch` for deterministic from-beginning
+tests. Direct menu entry avoids a double-`TV` toggle with MCP fullscreen
+verification. A clean Core build and real Fire TV Fixed MPEG-2/AC-3 test passed
+on 2026-08-30; deployed JAR SHA-256 is
+`929c1f57c48d532e849769a604c73613dd8e232b5171e3277f411a80b28764de`.
+Keep the property false outside explicitly commissioned test servers. The
+event also waits up to 15 seconds for the new UI's VideoFrame worker during
+reconnect, preventing the observed null-Seeker race before `watch()`.
+
+Core also has opt-in exact-channel event 231, gated by
+`miniclient/enable_vibe_channel_set_event`. It accepts only bounded dotted
+channel numbers and calls `surfToChan()` in the requesting UI. Negotiated media
+URLs carry `channel=` identity for supporting clients. On 2026-08-29 the
+isolated Unraid server and Amazon AFTMM passed 10 alternating 2.1/5.1 Pull
+changes on Media3 and legacy ExoPlayer, plus bounded tests of all four GSY
+engines. Both test-control properties must remain false outside commissioned
+debug servers.
+An event 231 request for the already-current channel reloads the live file so a
+newly connected client does not inherit an expired Fixed stream.
 
 Core's `sagetv-dev.sh` delegates to the sibling build-environment wrapper. Keep
 `opensagetv-vibe-dev` as the only development container; do not reintroduce

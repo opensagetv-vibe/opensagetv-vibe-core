@@ -1,33 +1,61 @@
-name: SageTV CI GitHub Actions
+name: Core repository checks
 
 on:
   push:
-    branches: [ master ]
+    branches:
+      - master
+      - ubuntu26-modern-build
   pull_request:
-    branches: [ master ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: core-checks-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  build:
-
-#    runs-on: ubuntu-latest 2025-03-04 changed to 22.04 as 20.04 is no longer supported as of 4/1/2025
-    runs-on: ubuntu-22.04
-
+  repository-checks:
+    runs-on: ubuntu-24.04
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up Oracle JDK 11
-      uses: actions/setup-java@v2
-      with:
-        java-version: '11'
-        distribution: 'adopt'
-        cache: gradle
-    - name: Update apt
-      run: sudo apt-get update -qq
-    - name: Install packages from apt
-      run: sudo apt-get install -y unzip build-essential git libx11-dev libxt-dev libraw1394-dev libavc1394-dev libiec61883-dev libfreetype6-dev yasm autoconf libtool libaudio-dev libpulse-dev libasound-dev
-    - name: Build everything
-      run: export JDK_HOME=$JAVA_HOME && export JAVA_ARCH=amd64 && cd build && ./buildall.sh && cd ..
-    - name: Deploy if release build and push
-      run: build/deploy.sh
-      env:
-        OPENSAGETV_TOKEN: ${{ secrets.opensagetv_token }}
-        PULL_REQUEST: ${{ github.event.number }}
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Verify repository policy
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f LICENSE
+          test -f THIRD_PARTY_NOTICES.md
+          test -f release.properties
+          test -f tests/linux-modern/test-all.sh
+          test -x sagetv-dev.sh
+          test -x dev.sh
+          test -x update.sh
+          git diff --check
+
+      - name: Check maintained shell entry points
+        shell: bash
+        run: |
+          set -euo pipefail
+          bash -n sagetv-dev.sh dev.sh update.sh
+          find tests/linux-modern -type f -name '*.sh' -print0 \
+            | xargs -0 -r bash -n
+
+      - name: Confirm generated and private runtime state is absent
+        shell: bash
+        run: |
+          set -euo pipefail
+          test ! -e output
+          test ! -e Sage.properties
+          test ! -e Wiz.bin
+          if find artifacts -mindepth 1 -type f ! -path 'artifacts/downloads/.gitkeep' -print -quit 2>/dev/null | grep -q .; then
+            echo 'Generated artifacts must not be committed.' >&2
+            exit 1
+          fi
+
+  # A complete Core build intentionally is not duplicated on the GitHub host.
+  # Release candidates must pass `./sagetv-dev.sh all` through the sibling
+  # opensagetv-vibe-build-env checkout, which builds and tests inside Ubuntu
+  # 26.04 and writes output/BUILD_REPORT.md.

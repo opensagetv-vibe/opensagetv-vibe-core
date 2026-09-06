@@ -492,16 +492,16 @@ linuxRunServer.doFirst {
 githubRelease
 {
   token System.getenv("OPENSAGETV_TOKEN") ?: 'null'
-  owner "OpenSageTV"
-  repo "sagetv-linux"
+  owner "opensagetv-vibe"
+  repo "opensagetv-vibe-core"
   tagName "${version}"
   targetCommitish "main"
   body {"""\
 # SageTV Version ${version} for Linux
 
-Changelog for this version:  https://github.com/google/sagetv/blob/master/CHANGELOG.md#${releaseVersion}
+Changelog for this version:  https://github.com/opensagetv-vibe/opensagetv-vibe-core/blob/main/CHANGELOG.md#${releaseVersion}
 
-Source code for SageTV:  https://github.com/google/sagetv
+Source code for SageTV:  https://github.com/opensagetv-vibe/opensagetv-vibe-core
 """ }
   releaseAssets = fileTree(dir: stageBuildDir, includes: ['*.tar.gz', '*.deb', '*.zip'])
 }
