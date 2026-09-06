@@ -1035,6 +1035,10 @@ native/SageWorkspace.VC.VC.opendb
 /nbbuild/
 /dist/
 output/
+/artifacts/*
+!/artifacts/downloads/
+/artifacts/downloads/*
+!/artifacts/downloads/.gitkeep
 third_party/ffmpeg/**/*.d
 third_party/ffmpeg/**/*.so
 third_party/ffmpeg/**/*.so.*

@@ -21,7 +21,7 @@ mkdir serverrelease
 cp release/Sage.jar ./serverrelease/
 cp -R serverfiles/* ./serverrelease/
 cp so/*.so ./serverrelease/
-rm serverrelease/libSageX11.so
+rm -f serverrelease/libSageX11.so
 cp so/libav* ./serverrelease/
 mkdir ./serverrelease/irtunerplugins
 cp so/irtunerplugins/*.so ./serverrelease/irtunerplugins/

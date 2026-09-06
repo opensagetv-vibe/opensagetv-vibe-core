@@ -2,7 +2,20 @@
 git rev-list HEAD | sort > config.git-hash
 LOCALVER=`wc -l config.git-hash | awk '{print $1}'`
 if [ $LOCALVER \> 1 ] ; then
-    VER=`git rev-list origin/master | sort | join config.git-hash - | wc -l | awk '{print $1}'`
+    # Forks use origin for the writable fork and upstream for the parent.
+    # Derive the version without assuming origin/master exists.
+    BASE_REF=""
+    for CANDIDATE in upstream/master origin/master master ; do
+        if git rev-parse --verify --quiet "$CANDIDATE^{commit}" >/dev/null ; then
+            BASE_REF="$CANDIDATE"
+            break
+        fi
+    done
+    if [ -n "$BASE_REF" ] ; then
+        VER=`git rev-list "$BASE_REF" | sort | join config.git-hash - | wc -l | awk '{print $1}'`
+    else
+        VER=$LOCALVER
+    fi
     if [ $VER != $LOCALVER ] ; then
         VER="$VER+$(($LOCALVER-$VER))"
     fi

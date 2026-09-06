@@ -3,6 +3,7 @@ set -euo pipefail
 cd /work/sagetv
 version=$(awk -F= '/VERSION_ID/{gsub(/"/,"",$2); print $2}' /etc/os-release)
 sage=$(grep -E 'MAJOR_VERSION|MINOR_VERSION|MICRO_VERSION' java/sage/Version.java | grep -o '[0-9][0-9]*' | paste -sd.)
+opendct_status=$(cat output/test-results/opendct-live.status)
 cat > output/BUILD_REPORT.md <<EOF
 # Ubuntu 26 SageTV build report
 
@@ -28,6 +29,9 @@ cat > output/BUILD_REPORT.md <<EOF
 | PNG formats and symbol preemption | PASS |
 | Malformed PNG containment | PASS |
 | SageTV startup | PASS |
+| SageTV UDP discovery and TCP service | PASS |
 | Repeated shutdown test | PASS |
-| Optional media tests | SKIPPED — no committed media fixtures |
+| OpenDCT AUTOINFOSCAN source contract | PASS |
+| Live OpenDCT channel scan | $opendct_status |
+| Optional media tests | SKIPPED - no committed media fixtures |
 EOF
