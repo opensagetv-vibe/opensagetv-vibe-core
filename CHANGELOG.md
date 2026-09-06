@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Standardized the source-only GitHub repository check as
+  `.github/workflows/repository-checks.yml` and limited automatic branch
+  triggers to the published Vibe `main` branch. The workflow validates policy,
+  shell syntax, and absence of generated/private state; it never deploys or
+  publishes artifacts.
 - Preserved this repository as the `opensagetv-vibe-core` GitHub fork of
   `OpenSageTV/sagetv`, documented upstream/release boundaries, indexed bundled
   third-party licenses, and replaced the inherited Ubuntu 22/legacy deployment

@@ -5,15 +5,15 @@
 - GitHub repository: `opensagetv-vibe/opensagetv-vibe-core`
 - Fork parent: `OpenSageTV/sagetv`
 - Historical source lineage: `google/sagetv`
-- Local modernization branch: `ubuntu26-modern-build`
+- Vibe default/development branch: `main`
 - `origin`: writable Vibe fork
 - `upstream`: read-only original OpenSageTV repository
 
-The fork exists publicly with its inherited `master` branch. The local
-modernization work must remain on `ubuntu26-modern-build` until its complete
-source, Docker, test, package, and independent-checkout gates pass. Do not push
-to the original OpenSageTV repository and do not invoke the inherited legacy
-deployment script from CI.
+The fork exists publicly with inherited upstream history retained on `master`
+and reviewed Vibe work on the default `main` branch. Complete source, Docker,
+test, package, and independent-checkout gates passed before `main` was
+published. Do not push to the original OpenSageTV repository and do not invoke
+the inherited legacy deployment script from CI.
 
 ## Standard takeover
 
