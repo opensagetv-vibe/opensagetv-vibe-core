@@ -50,6 +50,7 @@ public class MiniPlayer implements DVDMediaPlayer
   public static final int MEDIACMD_SETVOLUME = 27;
   public static final int MEDIACMD_FRAMESTEP = 28;
   public static final int MEDIACMD_SEEK = 29;
+  public static final int MEDIACMD_SETRATE = 30;
 
   public static final int MEDIACMD_DVD_STREAM = 36;
   public static final int MEDIACMD_DVD_NEWCELL = 32;
@@ -375,7 +376,7 @@ public class MiniPlayer implements DVDMediaPlayer
 
   public int getClosedCaptioningState()
   {
-    return CC_DISABLED;
+    return currCCState;
   }
 
   public java.awt.Color getColorKey()
@@ -515,7 +516,10 @@ public class MiniPlayer implements DVDMediaPlayer
 
   public int getPlaybackCaps()
   {
-    return PAUSE_CAP | SEEK_CAP; /* FRAME_STEP_FORWARD_CAP | */
+    int caps = PAUSE_CAP | SEEK_CAP; /* FRAME_STEP_FORWARD_CAP | */
+    if (mcsr != null && mcsr.supportsVibePlaybackRate())
+      caps |= PLAYRATE_FAST_CAP | PLAYRATE_SLOW_CAP | PLAYRATE_FAST_REV_CAP;
+    return caps;
   }
 
   public float getPlaybackRate()
@@ -1321,6 +1325,14 @@ public class MiniPlayer implements DVDMediaPlayer
           theURL = "stv://" + clientSocket.socket().getLocalAddress().getHostAddress() + "/" + file.getAbsolutePath();
         else
           theURL = file.getAbsolutePath();
+        if (mcsr.supportsMediaStateUrl() && theURL.startsWith("stv://"))
+        {
+          String channelHint = "";
+          if (currMF != null && currMF.getContentAiring() != null)
+            channelHint = currMF.getContentAiring().getChannelNum(0);
+          theURL = appendMediaStateUrl(theURL, majorTypeHint, minorTypeHint,
+              encodingHint, channelHint, timeshifted, bufferSize);
+        }
         if (!openURL0(theURL))
           throw new PlaybackException();
       }
@@ -2368,7 +2380,22 @@ public class MiniPlayer implements DVDMediaPlayer
 
   public boolean setClosedCaptioningState(int ccState)
   {
-    return false;
+    currCCState = ccState;
+    if (mcsr == null)
+      return false;
+
+    try
+    {
+      // OpenSageTV Vibe MiniClients use this property to make the SageTV STV
+      // caption state authoritative. Older MiniClients reject unknown
+      // properties, which preserves their historical behavior.
+      return mcsr.sendSetProperty("VIDEO_CC_STATE", Integer.toString(ccState)) == 0;
+    }
+    catch (java.io.IOException e)
+    {
+      if (Sage.DBG) System.out.println("Failed sending VIDEO_CC_STATE to MiniClient: " + e);
+      return false;
+    }
   }
 
   public void setMute(boolean x)
@@ -2391,6 +2418,20 @@ public class MiniPlayer implements DVDMediaPlayer
   public float setPlaybackRate(float newRate)
   {
     if (Sage.DBG) System.out.println("MiniPlayer.setPlaybackRate(" + newRate + ")");
+    // Vibe clients can negotiate bounded native forward rates and seek-based
+    // scanning for random-access Pull/SMB playback. Older clients never expose
+    // the property and retain the established one-shot seek behavior below.
+    if (!pushMode && mcsr != null && mcsr.supportsVibePlaybackRate())
+    {
+      addYieldDecoderLock();
+      synchronized (decoderLock)
+      {
+        myRate = setPlaybackRate0(newRate);
+        removeYieldDecoderLock();
+        decoderLock.notifyAll();
+      }
+      return myRate;
+    }
     // Don't allow modified playback rates if we're using the transcoder!
     // NOTE: Disable smooth FF/REW with the remuxer for now it needs more work!!!
     if (pushMode && (!serverSideTranscoding /*|| usingRemuxer*/))
@@ -3076,6 +3117,25 @@ public class MiniPlayer implements DVDMediaPlayer
     return false;
   }
 
+  static String appendMediaStateUrl(String url, byte majorTypeHint, byte minorTypeHint,
+      String encodingHint, String channelHint, boolean active, long bufferSize)
+  {
+    String encodedHint = "";
+    String encodedChannel = "";
+    try
+    {
+      encodedHint = java.net.URLEncoder.encode(encodingHint == null ? "" : encodingHint, "UTF-8");
+      encodedChannel = java.net.URLEncoder.encode(channelHint == null ? "" : channelHint, "UTF-8");
+    }
+    catch (java.io.UnsupportedEncodingException impossible) {}
+    return url + "#sagetv-media-v1;active=" + (active ? "1" : "0") +
+        ";buffer=" + Math.max(0, bufferSize) +
+        ";major=" + (majorTypeHint & 0xFF) +
+        ";minor=" + (minorTypeHint & 0xFF) +
+        ";channel=" + encodedChannel +
+        ";encoding=" + encodedHint;
+  }
+
   protected long getMediaTimeMillis0()
   {
     if (Sage.eventTime() - lastMediaTimeCacheTime < 100 || clientSocket == null)
@@ -3700,6 +3760,28 @@ public class MiniPlayer implements DVDMediaPlayer
       connectionError();
     }
     return true;
+  }
+
+  protected float setPlaybackRate0(float rate)
+  {
+    if (clientSocket == null) return 1.0f;
+    try
+    {
+      sockBuf.clear();
+      sockBuf.putInt(MEDIACMD_SETRATE<<24 | 4);
+      sockBuf.putInt(Float.floatToIntBits(rate));
+      sockBuf.flip();
+      while (sockBuf.hasRemaining())
+        clientSocket.write(sockBuf);
+      return Float.intBitsToFloat(clientInStream.readInt());
+    }
+    catch(Exception e)
+    {
+      if (Sage.DBG) System.out.println("Error setting Vibe MiniPlayer playback rate: " + e);
+      e.printStackTrace();
+      connectionError();
+      return 1.0f;
+    }
   }
 
   protected boolean DVDStream(int type, int stream)

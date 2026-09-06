@@ -125,6 +125,8 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
       reader.close();
       reader = null;
     }
+    closeMimTranscoder();
+    mimTransportActive = false;
     pushThread = null;
     if (unmountRequired != null)
     {
@@ -253,6 +255,12 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
       if (render.isMediaExtender() && render.isSupportedVideoCodec("MPEG2-VIDEO@HL"))
         hdMediaExtender = true;
       supportsFrameStep = render.supportsFrameStep();
+      mimNativeFallback = render.isVibeDiscNativeFallback();
+      mimTransportRequested = MiniDVDPlayerSelection.shouldUseMimTransport(
+          render.getVibeDiscPolicy(), render.supportsVibeDiscMimTransport(),
+          MiniDVDStreamTranscoder.isAvailable());
+      if (Sage.DBG) System.out.println("DVD transport policy=" + render.getVibeDiscPolicy() +
+          " mimRequested=" + mimTransportRequested + " nativeFallback=" + mimNativeFallback);
     }
 
     currState = NO_STATE;
@@ -367,6 +375,13 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
         synchronized (decoderLock)
         {
           if (Sage.DBG) System.out.println("MiniDVD seek to "+seekTimeMillis);
+          // The decoder's logical DVD clock must be re-anchored after a
+          // server-side VM seek. ProcessCell historically cleared updateSTC
+          // for ordinary non-discontinuous cell transitions, which also
+          // erased the pending FLUSH anchor and left MiniClients reporting the
+          // pre-seek time. Preserve an explicit seek anchor until the first
+          // NAV packet at the destination has supplied its exact elapsed PTS.
+          forceStcAfterSeek = true;
           long rv = reader.seek(seekTimeMillis);
           removeYieldDecoderLock();
           decoderLock.notifyAll();
@@ -593,6 +608,14 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
     return 0;
   }
 
+  public int getDVDMainFeatureTitle()
+  {
+    synchronized (this)
+    {
+      return reader == null ? 1 : reader.getDVDMainFeatureTitle();
+    }
+  }
+
   /*
 	public static final int DVD_CONTROL_MENU = 201; // 1 for title, 2 for root
 	public  static final int DVD_CONTROL_TITLE_SET = 202;
@@ -790,7 +813,7 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
     if (DEBUG_MINIDVD) System.out.println("PGC length "+duration);
     if (DEBUG_MINIDVD) System.out.println("discont detected "+discont);
     // For now disable that because NAV packet handling depends on cells flush.
-    updateSTC = (discont!=0);
+    updateSTC = forceStcAfterSeek || (discont!=0);
     return discont;
   }
 
@@ -905,6 +928,7 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
       {
         updateSTC = false;
         DVDSTC(ptr, cellStart+temp_pci.pci_gi.e_eltm.toPTS());//temp_pci.pci_gi.vobu_s_ptm.get());
+        forceStcAfterSeek = false;
       }
       // Don't re-allocate if we're not going to put it in the queue.
       // NARFLEX 8/1/08 - use a pool for this since its' LOTS of reallocations for the nested objects
@@ -1086,6 +1110,8 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
             }
             synchronized (decoderLock)
             {
+              if (!updateDiscTransportForDomain())
+                break;
               if (shouldYieldDecoderLock())
               {
                 try
@@ -1094,6 +1120,12 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                 }
                 catch (InterruptedException e)
                 {}
+                // A control operation (pause, seek, stop, media-time query,
+                // etc.) is waiting for this monitor. Do not reacquire it and
+                // continue into DVD parsing, FFmpeg input, or socket writes in
+                // the same iteration; yield the monitor at the end of this
+                // synchronized block and let the control operation run.
+                continue;
               }
               if(myReader != reader)
                 break;
@@ -1112,11 +1144,22 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                 boolean newHighlightOn = lastCurrentTracker.pci.hli.hl_gi.hli_ss.get() != 0;
                 if (newHighlightOn || highlightOn != newHighlightOn)
                 {
-                  ProcessHighlight(null, 0, theButton);
+                  // A DVD program-chain transition can reset or force the
+                  // VM's current button without emitting a separate highlight
+                  // process event. Reusing the previous cell's theButton makes
+                  // the client draw (and the user select) a different item
+                  // from reader.playControlEx(DVD_CONTROL_ACTIVATE_CURRENT).
+                  // Always synchronize the rendered highlight with the VM's
+                  // authoritative button when the NAV tracker changes.
+                  int navButton = MiniDVDPlayerSelection.currentNavButton(
+                      reader.player_button, theButton);
+                  ProcessHighlight(null, 0, navButton);
                 }
               }
               if (freeSpace < 32768 || dvdEos)
               {
+                if (mimTransportActive && dvdEos && !finishMimSegment(getFlags()))
+                  break;
                 if (!pushBuffer0(ptr, null, dvdEos ? (0x80 | getFlags()) : getFlags()))
                 {
                   if (Sage.DBG) System.out.println("push loop terminating because pushBuffer failed");
@@ -1161,8 +1204,28 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                   lastPlayRate = myRate;
                   int flags = getFlags();
                   if (debugPush) System.out.println("sending data len: "+readBufferSize);
-                  nioBuff.clear().limit(readBufferSize);
-                  if (!pushBuffer0(ptr, nioBuff, flags))
+                  boolean pushed;
+                  // A DVD VM can enter title domain before it emits a CELL/DATA
+                  // payload.  Do not open an empty MIM stream at that point: an
+                  // immediate EMPTY event closes FFmpeg without enough bytes to
+                  // probe and makes the MiniClient see an empty MPEG-TS segment.
+                  // Activate the transformed transport only when this first
+                  // real title payload is ready to be written.
+                  if (!mimTransportActive && mimTransportRequested &&
+                      reader != null && reader.getDVDDomain() == 4 &&
+                      !activateMimTransportForPayload())
+                    break;
+                  if (mimTransportActive)
+                  {
+                    pushed = writeMimInput(javaBuff, 0, readBufferSize) &&
+                        pushMimOutput(flags, 0);
+                  }
+                  else
+                  {
+                    nioBuff.clear().limit(readBufferSize);
+                    pushed = pushBuffer0(ptr, nioBuff, flags);
+                  }
+                  if (!pushed)
                   {
                     if (Sage.DBG) System.out.println("push loop terminating because pushBuffer failed");
                     break;
@@ -1204,6 +1267,8 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                     if (DEBUG_MINIDVD) System.out.println("Need to pause for "+ (retcode&0xFF) + " seconds");
                     if(pausetime==0) // new pause
                     {
+                      if (mimTransportActive && !finishMimSegment(getFlags()))
+                        break;
                       if (!pushBuffer0(ptr, null, 0x100))
                       {
                         if (Sage.DBG) System.out.println("push loop terminating because pushBuffer failed");
@@ -1234,10 +1299,20 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                     try { Thread.sleep(200); } catch(Exception e) {}
                     continue;
                   case DVDReader.DVD_PROCESS_EMPTY:
+                    if (mimTransportActive && !finishMimSegment(getFlags()))
+                      break;
                     if (!pushBuffer0(ptr, null, 0x100))
                     {
                       if (Sage.DBG) System.out.println("push loop terminating because pushBuffer failed");
                       break;
+                    }
+                    if (DEBUG_MINIDVD &&
+                        (freeSpace != lastDvdEmptyFreeSpace || Sage.eventTime() - lastDvdEmptyLogTime >= 2000))
+                    {
+                      System.out.println("DVD empty drain reply=" + freeSpace +
+                          " needclear=" + needclear + " state=" + currState);
+                      lastDvdEmptyFreeSpace = freeSpace;
+                      lastDvdEmptyLogTime = Sage.eventTime();
                     }
                     if(freeSpace==-2)
                     {
@@ -1275,6 +1350,8 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                       try { Thread.sleep(200); } catch(Exception e) {}
                     continue;
                   case DVDReader.DVD_PROCESS_FLUSH:
+                    if (mimTransportActive && !finishMimSegment(getFlags()))
+                      break;
                     flushPush0(ptr);
                     updateSTC=true;
                     continue;
@@ -1687,6 +1764,176 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
     return false;
   }
 
+  /** Switch only the media representation; the Java/Ogle DVD VM remains authoritative. */
+  private boolean updateDiscTransportForDomain()
+  {
+    boolean wantMim = mimTransportRequested && reader != null && reader.getDVDDomain() == 4;
+    if (wantMim == mimTransportActive)
+      return true;
+    // Entering title domain is not proof that the VM has media ready. Some
+    // discs report an EMPTY transition before their first CELL/DATA event.
+    // Defer MIM OPENURL/FFmpeg startup until the data path has a payload.
+    if (wantMim)
+      return true;
+    try
+    {
+      if (mimTransportActive && !finishMimSegment(0))
+        return false;
+      flushPush0(ptr);
+      String transportUrl = "push:dvd?vibe_transport=native&format=mpegps";
+      if (!openURL0(ptr, transportUrl))
+        throw new java.io.IOException("MiniClient rejected " + transportUrl);
+      mimTransportActive = wantMim;
+      freeSpace = 4 * 1024 * 1024;
+      if (Sage.DBG) System.out.println("DVD media transport switched to native MPEG-PS");
+      return true;
+    }
+    catch (java.io.IOException e)
+    {
+      return handleMimFailure(e);
+    }
+  }
+
+  /** Open MIM only after the DVD VM has supplied a real title payload. */
+  private boolean activateMimTransportForPayload()
+  {
+    if (mimTransportActive)
+      return true;
+    try
+    {
+      flushPush0(ptr);
+      String transportUrl = "push:dvd?vibe_transport=mim_ts_v1&format=mpegts";
+      if (!openURL0(ptr, transportUrl))
+        throw new java.io.IOException("MiniClient rejected " + transportUrl);
+      mimTransportActive = true;
+      freeSpace = 4 * 1024 * 1024;
+      dvdTranscoder = MiniDVDStreamTranscoder.start();
+      if (Sage.DBG) System.out.println(
+          "DVD media transport switched to MIM MPEG-TS on first title payload");
+      return true;
+    }
+    catch (java.io.IOException e)
+    {
+      return handleMimFailure(e);
+    }
+  }
+
+  private boolean writeMimInput(byte[] data, int offset, int length)
+  {
+    try
+    {
+      if (dvdTranscoder == null)
+        dvdTranscoder = MiniDVDStreamTranscoder.start();
+      dvdTranscoder.write(data, offset, length);
+      return true;
+    }
+    catch (java.io.IOException e)
+    {
+      return handleMimFailure(e);
+    }
+  }
+
+  /** Push all currently available transformed output; wait only when requested. */
+  private boolean pushMimOutput(int firstFlags, long firstWaitMillis)
+  {
+    if (dvdTranscoder == null)
+      return true;
+    boolean first = true;
+    try
+    {
+      byte[] chunk = dvdTranscoder.pollOutput(firstWaitMillis);
+      while (chunk != null)
+      {
+        while (freeSpace >= 0 && freeSpace < chunk.length)
+        {
+          if (!pushBuffer0(ptr, null, 0))
+            return false;
+          try { Thread.sleep(10); } catch (InterruptedException e)
+          {
+            Thread.currentThread().interrupt();
+            return false;
+          }
+        }
+        if (!pushBuffer0(ptr, java.nio.ByteBuffer.wrap(chunk), first ? firstFlags : 0))
+          return false;
+        first = false;
+        chunk = dvdTranscoder.pollOutput(0);
+      }
+      return true;
+    }
+    catch (java.io.IOException e)
+    {
+      return handleMimFailure(e);
+    }
+  }
+
+  /** Finish one finite VM segment so FFmpeg releases delayed frames and trailers. */
+  private boolean finishMimSegment(int firstFlags)
+  {
+    if (dvdTranscoder == null)
+      return true;
+    MiniDVDStreamTranscoder finishing = dvdTranscoder;
+    try
+    {
+      finishing.closeInput();
+      boolean first = true;
+      while (!finishing.isOutputEnded())
+      {
+        byte[] chunk = finishing.pollOutput(250);
+        if (chunk != null)
+        {
+          if (!pushBuffer0(ptr, java.nio.ByteBuffer.wrap(chunk), first ? firstFlags : 0))
+            return false;
+          first = false;
+        }
+      }
+      byte[] chunk;
+      while ((chunk = finishing.pollOutput(0)) != null)
+      {
+        if (!pushBuffer0(ptr, java.nio.ByteBuffer.wrap(chunk), first ? firstFlags : 0))
+          return false;
+        first = false;
+      }
+      // Delimit this transformed reader generation. Android retains the DVD
+      // session and treats it as transient EOS rather than end of the disc.
+      return pushBuffer0(ptr, null, 0x80);
+    }
+    catch (java.io.IOException e)
+    {
+      return handleMimFailure(e);
+    }
+    finally
+    {
+      finishing.close();
+      if (dvdTranscoder == finishing)
+        dvdTranscoder = null;
+    }
+  }
+
+  private boolean handleMimFailure(java.io.IOException failure)
+  {
+    System.out.println("DVD MIM transport failed: " + failure);
+    closeMimTranscoder();
+    if (!mimNativeFallback)
+      return false;
+    mimTransportRequested = false;
+    mimTransportActive = false;
+    flushPush0(ptr);
+    boolean restored = openURL0(ptr,
+        "push:dvd?vibe_transport=native&format=mpegps&fallback=mim_failure");
+    if (Sage.DBG) System.out.println("DVD native compatibility fallback restored=" + restored);
+    return restored;
+  }
+
+  private void closeMimTranscoder()
+  {
+    if (dvdTranscoder != null)
+    {
+      dvdTranscoder.close();
+      dvdTranscoder = null;
+    }
+  }
+
   protected java.awt.Dimension getVideoDimensions0(long ptr)
   {
     return new java.awt.Dimension(720,480);
@@ -2006,6 +2253,10 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
   protected long pausestart = 0;
   private sage.dvd.VM reader;
   protected Thread pushThread;
+  private MiniDVDStreamTranscoder dvdTranscoder;
+  private boolean mimTransportRequested;
+  private boolean mimTransportActive;
+  private boolean mimNativeFallback = true;
 
   private boolean needToPlay;
   int numPushedBuffers = 0;
@@ -2024,8 +2275,11 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
   private Object yieldDecoderLockCountLock = new Object();
 
   private boolean updateSTC;
+  private volatile boolean forceStcAfterSeek;
   private boolean needclear;
   private boolean neednewcell;
+  private int lastDvdEmptyFreeSpace = Integer.MIN_VALUE;
+  private long lastDvdEmptyLogTime;
 
   private int theButton;
   private NAVTracker lastCurrentTracker;
