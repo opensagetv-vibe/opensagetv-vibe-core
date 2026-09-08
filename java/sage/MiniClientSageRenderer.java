@@ -18,6 +18,11 @@ package sage;
 public class MiniClientSageRenderer extends SageRenderer
     implements NativeImageAllocator
 {
+  static boolean shouldResumeVibeRedundantWatch(boolean sameFile, int playerState)
+  {
+    return sameFile && playerState != MediaPlayer.PLAY_STATE;
+  }
+
   static boolean isValidVibeChannel(String channel)
   {
     return channel != null && channel.matches("[0-9]+(?:\\.[0-9]+)?");
@@ -8216,6 +8221,9 @@ public class MiniClientSageRenderer extends SageRenderer
                         return;
                       }
                       if (Sage.DBG) System.out.println("Vibe MiniClient watch-file request path=" + watchPath);
+                      MediaFile currentWatchFile = vf.getCurrFile();
+                      boolean resumeRedundantWatch = shouldResumeVibeRedundantWatch(
+                          currentWatchFile == watchFile, vf.getPlayerState());
                       int watchResult = watchFromBeginning &&
                           (watchFile.isDVD() || watchFile.isBluRay()) ?
                           vf.watchFromBeginning(watchFile) : vf.watch(watchFile);
@@ -8235,6 +8243,19 @@ public class MiniClientSageRenderer extends SageRenderer
                           vf.timeJump(firstMediaTime);
                           if (Sage.DBG) System.out.println("Vibe MiniClient watch-file queued from beginning time=" +
                               firstMediaTime + " path=" + watchPath);
+                        }
+                        // VideoFrame.watch() deliberately treats the current
+                        // MediaFile as a redundant request. After STOP or PAUSE
+                        // that returns WATCH_OK without queuing PLAY, leaving a
+                        // deterministic repeat request accepted but idle. This
+                        // behavior is scoped to the opt-in Vibe event: selecting
+                        // the same stopped file means resume it, while an
+                        // already-playing file is left alone.
+                        if (resumeRedundantWatch)
+                        {
+                          vf.play();
+                          if (Sage.DBG) System.out.println(
+                              "Vibe MiniClient watch-file resumed redundant stopped file path=" + watchPath);
                         }
                         // Watch() starts the player, but it does not execute the STV action
                         // that normally enters full-screen playback after "Watch Now". Route

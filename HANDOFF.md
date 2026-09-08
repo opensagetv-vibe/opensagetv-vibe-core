@@ -1,5 +1,21 @@
 # Core handoff
 
+## Pending physical Vibe redundant-watch gate
+
+The opt-in Vibe exact-file event now resumes the current MediaFile when the
+request is redundant but its player is stopped or paused. This addresses
+alternate STVs such as SageMC that retain a stopped MiniPlayer session; normal
+SageTV watch behavior and already-playing requests are unchanged. Focused unit
+coverage and the complete Core test/build gates pass. The resulting
+`build/release/Sage.jar` SHA-256 is
+`d5a929688f681f5b337c0896d0d6d2b9327675afbf73657ebe38cb4518aeccf4`.
+
+That JAR is staged only on isolated `.232`, with rollback copy
+`Sage.jar.pre-redundant-watch-20260908-051446` and an intermediate staged-JAR
+copy `Sage.jar.pre-watch-unit-helper-20260908`. The server JVM still needs a
+restart before the physical repeated-playback gate can run; stock `.175` was
+not modified.
+
 ## Repository identity
 
 - GitHub repository: `opensagetv-vibe/opensagetv-vibe-core`

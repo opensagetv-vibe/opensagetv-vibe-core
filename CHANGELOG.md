@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+- Made the opt-in Vibe exact-file commissioning event resume a stopped or
+  paused redundant watch request for the same MediaFile. Stock watch behavior
+  is unchanged: the correction is confined to the property-gated Vibe event,
+  avoids issuing an extra play for an already active file, and has focused
+  compatibility coverage.
+
 - Standardized the source-only GitHub repository check as
   `.github/workflows/repository-checks.yml` and limited automatic branch
   triggers to the published Vibe `main` branch. The workflow validates policy,

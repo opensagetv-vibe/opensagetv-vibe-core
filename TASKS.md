@@ -3,6 +3,10 @@
 This is the only active Core backlog. Completed work is removed and recorded
 in `CHANGELOG.md` and `HANDOFF.md`.
 
+- [ ] Restart isolated test server `.232`, physically prove repeated exact-file
+  playback after STOP through SageMC, then publish the opt-in Vibe
+  redundant-watch correction. The full Core build and focused unit gate pass;
+  stock `.175` remains untouched.
 - [ ] Address important remaining compiler/Gradle warnings in narrowly scoped,
   tested changes without enabling global `-Werror`.
 - [ ] Prepare an upstream-review branch, tag, release notes, and published
