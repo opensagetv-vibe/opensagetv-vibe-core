@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Restored executable Git metadata for the maintained Ubuntu/Linux Core test
+  suite and added a repository-CI guard so direct Linux execution cannot regress.
 - Updated the read-only repository workflow to the current Node 24-based
   `actions/checkout@v7` release, eliminating the obsolete-action warning while
   preserving the source-only, non-publishing CI boundary.

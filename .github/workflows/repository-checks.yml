@@ -28,7 +28,11 @@ jobs:
           test -f LICENSE
           test -f THIRD_PARTY_NOTICES.md
           test -f release.properties
-          test -f tests/linux-modern/test-all.sh
+          test -x tests/linux-modern/test-all.sh
+          if test -n "$(find tests/linux-modern -type f -name '*.sh' ! -perm -u+x -print -quit)"; then
+            echo 'Maintained Linux test scripts must be executable.' >&2
+            exit 1
+          fi
           test -x sagetv-dev.sh
           test -x dev.sh
           test -x update.sh
