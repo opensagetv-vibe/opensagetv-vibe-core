@@ -43,6 +43,8 @@ not modified.
 - GitHub repository: `opensagetv-vibe/opensagetv-vibe-core`
 - Fork parent: `OpenSageTV/sagetv`
 - Historical source lineage: `google/sagetv`
+- Read-only repository CI uses the current `actions/checkout@v7`; it does not
+  build, deploy, publish, or modify external systems.
 - Vibe default/development branch: `main`
 - `origin`: writable Vibe fork
 - `upstream`: read-only original OpenSageTV repository

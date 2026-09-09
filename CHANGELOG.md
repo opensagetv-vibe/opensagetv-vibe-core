@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Updated the read-only repository workflow to the current Node 24-based
+  `actions/checkout@v7` release, eliminating the obsolete-action warning while
+  preserving the source-only, non-publishing CI boundary.
 - Added a disabled-by-default playback repair for completed imported videos
   whose persisted database metadata is the historical one-millisecond,
   zero-stream failure state. The opt-in path reparses only a single local
