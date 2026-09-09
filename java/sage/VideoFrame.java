@@ -2246,6 +2246,11 @@ public final class VideoFrame extends BasicVideoFrame implements Runnable
     }
     else if (daJob.id == WATCH_MF)
     {
+      // Imported files whose initial FFmpeg probe failed are stored with a
+      // one-millisecond duration. Repair that sentinel on this worker before
+      // the STV receives the file-load hook or computes a seek target.
+      ImportedMediaMetadataRepair.repairBeforePlayback(daJob.file);
+
       MediaFile previousFile = currFile;
       if (currFile != null && !currFile.isAnyLiveStream())
       {

@@ -3,6 +3,15 @@
 This is the only active Core backlog. Completed work is removed and recorded
 in `CHANGELOG.md` and `HANDOFF.md`.
 
+- [ ] Prove the opt-in repair for clearly invalid completed-import metadata on
+  isolated server `.232`; it remains disabled by default because valid MKVs
+  already play and seek through unmodified stock SageTV. When explicitly
+  enabled, repair on first playback and prove `The Lion King.mkv` reports its
+  real duration and obeys remote timeline seeks. The current database row is
+  1 ms/zero-stream while FFmpeg and Android both detect 1:58:14.588; exclude
+  recordings, live streams, and discs. Also
+  prove a shutdown-time linkage failure cannot leave the server alive after
+  its MiniClient and MediaServer listeners have already closed.
 - [ ] Restart isolated test server `.232`, physically prove repeated exact-file
   playback after STOP through SageMC, then publish the opt-in Vibe
   redundant-watch correction. The full Core build and focused unit gate pass;

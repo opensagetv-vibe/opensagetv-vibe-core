@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+- Added a disabled-by-default playback repair for completed imported videos
+  whose persisted database metadata is the historical one-millisecond,
+  zero-stream failure state. The opt-in path reparses only a single local
+  regular video file and excludes recordings, live streams, discs, pictures,
+  music, remote inputs, and valid metadata. Valid MKVs continue to use normal
+  stock-compatible playback without any repair or server requirement.
+- Guaranteed headless JVM termination from `SageTV.exit()` when shutdown has
+  already started and a later linkage/plugin error interrupts normal cleanup.
+  This lets the container supervisor recover instead of leaving closed
+  MiniClient/MediaServer listeners attached to a stranded JVM.
+  The complete Ubuntu 26 gate passes Java/tests, all native libraries,
+  JNI/ELF validation, PNG and malformed-image tests, packaging, server startup,
+  MiniClient UDP/TCP service checks, and repeated shutdown.
 - Made the opt-in Vibe exact-file commissioning event resume a stopped or
   paused redundant watch request for the same MediaFile. Stock watch behavior
   is unchanged: the correction is confined to the property-gated Vibe event,

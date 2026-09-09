@@ -1,5 +1,27 @@
 # Core handoff
 
+## Pending opt-in imported-metadata and shutdown gate
+
+Valid imported MKVs physically pass Media3 and legacy Exo hardware Pull against
+unmodified stock server `.175`; stock remains the primary compatibility path.
+The isolated `.232` database separately contains one-millisecond/zero-stream
+rows that make its STV clamp timeline seeks before the Android player sees
+them. A narrowly bounded Core repair now exists behind disabled-by-default
+property `videoframe/repair_invalid_imported_metadata_on_playback`. It only
+reparses a completed, imported, single local regular video with corroborating
+invalid metadata and excludes recordings, live streams, discs, pictures,
+music, remote inputs, and valid rows. `SageTV.exit()` also guarantees final JVM
+termination if a shutdown-time linkage/plugin failure interrupts cleanup.
+
+Focused tests and the complete Ubuntu 26 build/native/package/server-smoke gate
+pass. The staged isolated-server `Sage.jar` SHA-256 is
+`0ad22a25a03e2d1cb3a3ddb16eea84691e9f15575be77d9027ad93f8604da419`;
+the immediately prior build is recoverable from
+`.component-backups/core-full-gate-20260909-1255`. The `.232` container
+is currently stopped/unreachable and must receive a normal restart before the
+opt-in Lion King metadata, repeated seek, thumbnail, and shutdown gates can be
+commissioned. Stock `.175` was not modified.
+
 ## Pending physical Vibe redundant-watch gate
 
 The opt-in Vibe exact-file event now resumes the current MediaFile when the
