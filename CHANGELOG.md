@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Added the measured Core/upstream/plugin evaluation for the stock-compatible
+  Vibe Core MCP bridge. Stock `.175` retained its byte-identical `Sage.jar`
+  while the separate plugin and Android adapter passed exact-path playback,
+  seek, channel, caption, scan, watched-state, diagnostics, and physical
+  non-Pro playback/live-TV gates. Private events 230-232 are now deprecated
+  for commissioning use; irreducible DVD/caption/player protocol work remains
+  explicitly separated.
 - Routed `MiniDVDStreamTranscoder` through SageTV's existing
   `FFMPEGTranscoder.getTranscoderPath()` resolver instead of opening the stock
   `ffmpeg` path directly. This preserves SageTV's established

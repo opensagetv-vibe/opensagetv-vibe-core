@@ -1,5 +1,22 @@
 # Core handoff
 
+## Stock-compatible Core MCP bridge closure (2026-09-20)
+
+The sibling `opensagetv-vibe-core-MCP-Plugin` project now implements the
+commissioning controls that can be expressed through stock SageTV APIs. Version
+0.1.1 passed its clean build/contracts, direct authenticated control suite, and
+the non-Pro Fire TV exact-path playback/live-TV gates against stock `.175`.
+The `.175` `Sage.jar` remained byte-identical with SHA-256
+`d76ded981b9bc51e25b9cec821b6abeb771b46c2996dc45e453349b5e703fcb0`.
+
+Core private events 230-232 are deprecated for automation but remain
+disabled-by-default compatibility fallbacks until all Vibe servers are
+commissioned with the plugin. Event 233 remains temporarily for server-owned
+DVD Push seeking until that exact boundary receives a physical plugin test.
+The plugin cannot replace native/hybrid/MIM DVD transport, media command 30,
+`MEDIA_STATE_URL`, new caption payloads, decoder scheduling, reconnect fixes,
+or DVD VM behavior. See `docs/UPSTREAM_AND_MCP_PLUGIN_EVALUATION.md`.
+
 ## DVD MIM plugin-resolver commissioning (2026-09-20)
 
 `MiniDVDStreamTranscoder` now resolves its executable through the same stock
