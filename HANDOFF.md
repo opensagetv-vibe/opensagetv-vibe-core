@@ -1,5 +1,30 @@
 # Core handoff
 
+## DVD MIM plugin-resolver commissioning (2026-09-20)
+
+`MiniDVDStreamTranscoder` now resolves its executable through the same stock
+`FFMPEGTranscoder.getTranscoderPath()` path used by ordinary SageTV
+transcoding. This fixes an integration defect where negotiated DVD MIM bypassed
+the installed `SageTVTranscoder` plugin bridge and tried stock `ffmpeg`
+directly. Focused coverage proves `SageTVTranscoder` wins when present, and the
+complete clean Core Java/native/JNI/package/server gate passes.
+
+The resulting `Sage.jar` SHA-256 is
+`8d146702c1a8d5361c815ae925b9bf9a3a768ee0414e1011c7a198a419e741cb`.
+It is installed only on isolated `.232`; its recoverable pre-install backup is
+`/mnt/user/appdata/sagetv-vibe-server-u26-gpu-j11/.component-backups/core-20260920-183549`.
+Stock `.175` was not changed, and `.232`'s stock `ffmpeg` remained
+byte-identical with SHA-256
+`bdf6aabffdba7411edff8d36c389d695257fcdf823d196020176e117612862f6`.
+
+Non-Pro Fire TV `.25` physically passed the generated authored DVD through
+explicit MIM main-feature policy: VAAPI `h264_vaapi` server encoding, Android
+hardware AVC decoding, 1.002x cadence, zero dropped frames, and recovery after
+pause/play, FF, REW, and chapter-up. This optional DVD integration requires the
+updated Vibe Core because unmodified stock Core has no DVD-to-plugin transform
+hook; ordinary prerecorded/live plugin transcoding remains stock-Sage.jar
+compatible.
+
 ## Pending opt-in imported-metadata and shutdown gate
 
 Valid imported MKVs physically pass Media3 and legacy Exo hardware Pull against

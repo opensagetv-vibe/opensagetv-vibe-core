@@ -46,7 +46,20 @@ final class MiniDVDStreamTranscoder
 
   static synchronized boolean isAvailable()
   {
-    File tool = new File(Sage.getToolPath("ffmpeg"));
+    File tool;
+    try
+    {
+      // Use the same stock SageTV transcoder resolver as every ordinary
+      // FFMPEGTranscoder job. This preserves stock ffmpeg fallback while
+      // allowing an installed SageTVTranscoder plugin bridge to advertise
+      // and provide the DVD stream transform.
+      tool = resolveTranscoderTool();
+    }
+    catch (RuntimeException e)
+    {
+      if (Sage.DBG) System.out.println("DVD MIM capability probe has no transcoder: " + e);
+      return false;
+    }
     String identity = tool.getAbsolutePath() + ':' + tool.length() + ':' + tool.lastModified();
     if (identity.equals(cachedToolIdentity))
       return cachedAvailable;
@@ -88,7 +101,15 @@ final class MiniDVDStreamTranscoder
 
   static MiniDVDStreamTranscoder start() throws IOException
   {
-    File tool = new File(Sage.getToolPath("ffmpeg"));
+    File tool;
+    try
+    {
+      tool = resolveTranscoderTool();
+    }
+    catch (RuntimeException e)
+    {
+      throw new IOException("DVD FFmpeg/MIM transcoder is unavailable", e);
+    }
     if (!tool.isFile())
       throw new IOException("FFmpeg/MIM executable is missing: " + tool);
 
@@ -113,6 +134,11 @@ final class MiniDVDStreamTranscoder
 
     if (Sage.DBG) System.out.println("Starting DVD FFmpeg/MIM stream transform: " + command);
     return new MiniDVDStreamTranscoder(new ProcessBuilder(command).start());
+  }
+
+  static File resolveTranscoderTool()
+  {
+    return new File(FFMPEGTranscoder.getTranscoderPath());
   }
 
   void write(byte[] data, int offset, int length) throws IOException

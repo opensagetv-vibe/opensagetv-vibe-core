@@ -2,6 +2,8 @@ package sage;
 
 import org.testng.annotations.Test;
 
+import java.io.File;
+
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -89,5 +91,35 @@ public class VideoFrameRemoteDvdTest
     assertFalse(MiniDVDStreamTranscoder.capabilitiesAdvertiseTransform(
         "{\"dvdStreamTransform\":false}"));
     assertFalse(MiniDVDStreamTranscoder.capabilitiesAdvertiseTransform(null));
+  }
+
+  @Test
+  public void dvdMimUsesTheStockSageTvTranscoderPreference() throws Exception
+  {
+    String originalToolsPath = System.getProperty("sage.paths.tools");
+    File tools = File.createTempFile("sagetv-dvd-mim-tools", "");
+    assertTrue(tools.delete());
+    assertTrue(tools.mkdirs());
+    try
+    {
+      System.setProperty("sage.paths.tools", tools.getAbsolutePath());
+      File stock = new File(Sage.getToolPath("ffmpeg"));
+      File bridge = new File(Sage.getToolPath("SageTVTranscoder"));
+      assertTrue(stock.createNewFile());
+      assertTrue(bridge.createNewFile());
+
+      assertEquals(MiniDVDStreamTranscoder.resolveTranscoderTool().getCanonicalFile(),
+          bridge.getCanonicalFile());
+    }
+    finally
+    {
+      if (originalToolsPath == null)
+        System.clearProperty("sage.paths.tools");
+      else
+        System.setProperty("sage.paths.tools", originalToolsPath);
+      new File(tools, Sage.WINDOWS_OS ? "ffmpeg.exe" : "ffmpeg").delete();
+      new File(tools, Sage.WINDOWS_OS ? "SageTVTranscoder.exe" : "SageTVTranscoder").delete();
+      tools.delete();
+    }
   }
 }
