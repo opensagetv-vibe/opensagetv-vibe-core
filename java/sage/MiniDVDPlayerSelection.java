@@ -60,14 +60,14 @@ final class MiniDVDPlayerSelection
       return false;
     MiniClientSageRenderer mini = (MiniClientSageRenderer) renderer;
     return mini.supportsRemoteDVDNavigation() &&
-        (mini.isVibeDiscSkipMenus() || "mim_main_feature".equals(mini.getVibeDiscPolicy()));
+        (mini.isDvdDiscSkipMenus() || "mim_main_feature".equals(mini.getDvdDiscPolicy()));
   }
 
   static boolean clientRequestsPreviewSkip(SageRenderer renderer)
   {
     return renderer instanceof MiniClientSageRenderer &&
         ((MiniClientSageRenderer) renderer).supportsRemoteDVDNavigation() &&
-        !((MiniClientSageRenderer) renderer).isVibeDiscSkipMenus() &&
-        ((MiniClientSageRenderer) renderer).isVibeDiscSkipPreviews();
+        !((MiniClientSageRenderer) renderer).isDvdDiscSkipMenus() &&
+        ((MiniClientSageRenderer) renderer).isDvdDiscSkipPreviews();
   }
 }

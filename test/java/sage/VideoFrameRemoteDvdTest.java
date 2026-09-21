@@ -76,11 +76,11 @@ public class VideoFrameRemoteDvdTest
   @Test
   public void discPolicyNegotiationRejectsUnknownValues()
   {
-    assertEquals(MiniClientSageRenderer.normalizeVibeDiscPolicy("native"), "native");
-    assertEquals(MiniClientSageRenderer.normalizeVibeDiscPolicy("HYBRID"), "hybrid");
-    assertEquals(MiniClientSageRenderer.normalizeVibeDiscPolicy("mim_main_feature"), "mim_main_feature");
-    assertEquals(MiniClientSageRenderer.normalizeVibeDiscPolicy("future-mode"), "auto");
-    assertEquals(MiniClientSageRenderer.normalizeVibeDiscPolicy(null), "auto");
+    assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy("native"), "native");
+    assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy("HYBRID"), "hybrid");
+    assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy("mim_main_feature"), "mim_main_feature");
+    assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy("future-mode"), "auto");
+    assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy(null), "auto");
   }
 
   @Test

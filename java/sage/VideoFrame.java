@@ -5040,8 +5040,8 @@ public final class VideoFrame extends BasicVideoFrame implements Runnable
             MiniClientSageRenderer dvdRenderer = (MiniClientSageRenderer) uiMgr.getRootPanel().getRenderEngine();
             if (!MiniDVDPlayerSelection.shouldUseServerNavigation(
                 dvdRenderer.supportsRemoteDVDNavigation(), dvdRenderer.getInputDevsProp(),
-                dvdRenderer.getVibeDiscPolicy(), dvdRenderer.isVibeDiscNativeFallback(),
-                dvdRenderer.supportsVibeDiscMimTransport() && MiniDVDStreamTranscoder.isAvailable()))
+                dvdRenderer.getDvdDiscPolicy(), dvdRenderer.isDvdDiscNativeFallback(),
+                dvdRenderer.supportsDvdDiscMimTransport() && MiniDVDStreamTranscoder.isAvailable()))
               return false;
           }
           return true;
@@ -5155,8 +5155,8 @@ public final class VideoFrame extends BasicVideoFrame implements Runnable
           MiniClientSageRenderer dvdRenderer = (MiniClientSageRenderer) uiMgr.getRootPanel().getRenderEngine();
           if (!MiniDVDPlayerSelection.shouldUseServerNavigation(
               dvdRenderer.supportsRemoteDVDNavigation(), dvdRenderer.getInputDevsProp(),
-              dvdRenderer.getVibeDiscPolicy(), dvdRenderer.isVibeDiscNativeFallback(),
-              dvdRenderer.supportsVibeDiscMimTransport() && MiniDVDStreamTranscoder.isAvailable()))
+              dvdRenderer.getDvdDiscPolicy(), dvdRenderer.isDvdDiscNativeFallback(),
+              dvdRenderer.supportsDvdDiscMimTransport() && MiniDVDStreamTranscoder.isAvailable()))
             return new MiniPlayer();
         }
         try

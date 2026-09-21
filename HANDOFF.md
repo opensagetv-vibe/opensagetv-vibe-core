@@ -1,5 +1,19 @@
 # Core handoff
 
+## Functional MiniClient capability names (2026-09-20)
+
+Core now queries `DVD_DISC_TRANSPORTS`, `DVD_DISC_POLICY`,
+`DVD_DISC_SKIP_MENUS`, `DVD_DISC_SKIP_PREVIEWS`,
+`DVD_DISC_NATIVE_FALLBACK`, and `VIDEO_PLAYBACK_RATE`. The previous
+Vibe-branded property names are not retained as wire aliases. These optional
+extensions therefore require a matched updated Core and Android client;
+unmodified stock clients and servers retain their established fallback paths.
+
+Focused compatibility tests and the complete Ubuntu 26 Java/native/JNI/
+ImageLoader/package/server gate pass. The rebuilt `Sage.jar` SHA-256 is
+`07e727cc4467bef1dd3c08b41f94944bccd61f8c0a4750e01d684614994b002f`.
+It has not been commissioned to a server by this change.
+
 ## Stock-compatible Core MCP bridge closure (2026-09-20)
 
 The sibling `opensagetv-vibe-core-MCP-Plugin` project now implements the
@@ -9,13 +23,26 @@ the non-Pro Fire TV exact-path playback/live-TV gates against stock `.175`.
 The `.175` `Sage.jar` remained byte-identical with SHA-256
 `d76ded981b9bc51e25b9cec821b6abeb771b46c2996dc45e453349b5e703fcb0`.
 
-Core private events 230-232 are deprecated for automation but remain
-disabled-by-default compatibility fallbacks until all Vibe servers are
-commissioned with the plugin. Event 233 remains temporarily for server-owned
-DVD Push seeking until that exact boundary receives a physical plugin test.
+Core private commissioning events 230-232 and their Android emitters have been
+removed after exact indexed-file `Watch`, from-beginning `Watch` plus `Seek`,
+and dotted-channel `ChannelSet` passed through the stock-compatible plugin on
+`.175`. Public `Seek(long)` also physically repositioned ALADDIN DVD Push from
+621,386 ms to 240,000 ms immediately and continued normally; repeated stable
+targets passed in both directions. Event 233 is also removed: Android now
+refreshes its local Media3 video Surface without replacing or seeking the
+server-owned DVD stream. Events 230-233 no longer exist in the Vibe Core
+MiniClient receiver. Public `Seek(long)` remains the validated path for actual
+DVD repositioning.
+The complete clean Java/native/JNI/ImageLoader/package/server gate passes after
+that removal. The current `Sage.jar` SHA-256 is
+`a72e371b7eab4313148d3983317f40835f8ab37ee9972bf1ed18da4626a7f8f9`.
+That exact JAR is running in the rebuilt isolated `.232` Vibe container, which
+is healthy and also loads the separately packaged Core MCP plugin. Stock
+`.175` remains unchanged.
 The plugin cannot replace native/hybrid/MIM DVD transport, media command 30,
 `MEDIA_STATE_URL`, new caption payloads, decoder scheduling, reconnect fixes,
-or DVD VM behavior. See `docs/UPSTREAM_AND_MCP_PLUGIN_EVALUATION.md`.
+or DVD VM behavior. See `docs/UPSTREAM_EVALUATION.md` for the upstream-only
+change assessment.
 
 ## DVD MIM plugin-resolver commissioning (2026-09-20)
 
@@ -91,6 +118,22 @@ not modified.
 - `origin`: writable Vibe fork
 - `upstream`: read-only original OpenSageTV repository
 
+## Upstream review staging
+
+Twelve focused `upstream-review/*` branches are published on the Vibe fork.
+They cover the Linux launcher, network encoder discovery, native GCC/64-bit
+compatibility, source-clean builds, Ubuntu 26/ImageLoader modernization,
+shutdown hardening, imported metadata repair, four independent DVD correctness
+topics, and the optional MiniClient capability protocol. Exact branch names,
+commits, validation, dependencies, and exclusions are recorded in
+`docs/UPSTREAM_EVALUATION.md`.
+
+No pull request has been opened against `OpenSageTV/sagetv`. The review branches
+must not be merged as one omnibus change. Generic fixes are independent;
+protocol, timing, metadata, and DVD behavior retain their explicit validation
+requirements. DVD MIM remains Vibe-only until its capability and external
+FFmpeg provider can be reviewed as a complete stacked contract.
+
 The fork exists publicly with inherited upstream history retained on `master`
 and reviewed Vibe work on the default `main` branch. Complete source, Docker,
 test, package, and independent-checkout gates passed before `main` was
@@ -128,7 +171,7 @@ its `output/BUILD_REPORT.md` records PASS for Java/tests, every required native
 library, JNI/ELF, system-libpng PNG regressions, malformed-input containment,
 server startup, and repeated shutdown.
 
-Core now negotiates `VIBE_PLAYBACK_RATE` after the existing DISC properties.
+Core now negotiates `VIDEO_PLAYBACK_RATE` after the existing DVD DISC properties.
 Only a non-empty client reply enables MiniPlayer command 30 for Pull Smooth
 FF/REW; older clients keep the historical one-shot seek behavior. The focused
 compatibility test and `sageJar` task pass. The commissioned Vibe test server
@@ -158,30 +201,11 @@ previews; skip menus selects the longest authored VM title. The preceding JARs
 remain available as `Sage.jar.backup-before-disc-seek-20260901` and
 `Sage.jar.backup-before-disc-fail-closed-20260901`.
 
-Core also contains opt-in MiniClient events 230 and 232 for exact indexed-file playback
-during hardware-in-loop testing. It is gated by
-`miniclient/enable_vibe_watch_file_event`, rejects invalid/NUL/oversized and
-unindexed paths, calls `VideoFrame.watch()` only in the requesting UI context,
-and enters `MediaPlayer OSD` directly on the UI event thread. Event 232 queues
-the first media-segment time behind `Watch` for deterministic from-beginning
-tests. Direct menu entry avoids a double-`TV` toggle with MCP fullscreen
-verification. A clean Core build and real Fire TV Fixed MPEG-2/AC-3 test passed
-on 2026-08-30; deployed JAR SHA-256 is
-`929c1f57c48d532e849769a604c73613dd8e232b5171e3277f411a80b28764de`.
-Keep the property false outside explicitly commissioned test servers. The
-event also waits up to 15 seconds for the new UI's VideoFrame worker during
-reconnect, preventing the observed null-Seeker race before `watch()`.
-
-Core also has opt-in exact-channel event 231, gated by
-`miniclient/enable_vibe_channel_set_event`. It accepts only bounded dotted
-channel numbers and calls `surfToChan()` in the requesting UI. Negotiated media
-URLs carry `channel=` identity for supporting clients. On 2026-08-29 the
-isolated Unraid server and Amazon AFTMM passed 10 alternating 2.1/5.1 Pull
-changes on Media3 and legacy ExoPlayer, plus bounded tests of all four GSY
-engines. Both test-control properties must remain false outside commissioned
-debug servers.
-An event 231 request for the already-current channel reloads the live file so a
-newly connected client does not inherit an expired Fixed stream.
+Core no longer contains private MiniClient commissioning events 230–233 or
+their enablement properties. Exact indexed-file playback, from-beginning
+playback, channel selection, and explicit seek use supported SageTV APIs.
+Android display-mode recovery is local to the client and does not seek or
+replace the server-owned stream.
 
 Core's `sagetv-dev.sh` delegates to the sibling build-environment wrapper. Keep
 `opensagetv-vibe-dev` as the only development container; do not reintroduce

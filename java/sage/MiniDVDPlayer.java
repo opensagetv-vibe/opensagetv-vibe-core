@@ -255,11 +255,11 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
       if (render.isMediaExtender() && render.isSupportedVideoCodec("MPEG2-VIDEO@HL"))
         hdMediaExtender = true;
       supportsFrameStep = render.supportsFrameStep();
-      mimNativeFallback = render.isVibeDiscNativeFallback();
+      mimNativeFallback = render.isDvdDiscNativeFallback();
       mimTransportRequested = MiniDVDPlayerSelection.shouldUseMimTransport(
-          render.getVibeDiscPolicy(), render.supportsVibeDiscMimTransport(),
+          render.getDvdDiscPolicy(), render.supportsDvdDiscMimTransport(),
           MiniDVDStreamTranscoder.isAvailable());
-      if (Sage.DBG) System.out.println("DVD transport policy=" + render.getVibeDiscPolicy() +
+      if (Sage.DBG) System.out.println("DVD transport policy=" + render.getDvdDiscPolicy() +
           " mimRequested=" + mimTransportRequested + " nativeFallback=" + mimNativeFallback);
     }
 

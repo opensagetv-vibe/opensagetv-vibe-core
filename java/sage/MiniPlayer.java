@@ -517,7 +517,7 @@ public class MiniPlayer implements DVDMediaPlayer
   public int getPlaybackCaps()
   {
     int caps = PAUSE_CAP | SEEK_CAP; /* FRAME_STEP_FORWARD_CAP | */
-    if (mcsr != null && mcsr.supportsVibePlaybackRate())
+    if (mcsr != null && mcsr.supportsVideoPlaybackRate())
       caps |= PLAYRATE_FAST_CAP | PLAYRATE_SLOW_CAP | PLAYRATE_FAST_REV_CAP;
     return caps;
   }
@@ -2421,7 +2421,7 @@ public class MiniPlayer implements DVDMediaPlayer
     // Vibe clients can negotiate bounded native forward rates and seek-based
     // scanning for random-access Pull/SMB playback. Older clients never expose
     // the property and retain the established one-shot seek behavior below.
-    if (!pushMode && mcsr != null && mcsr.supportsVibePlaybackRate())
+    if (!pushMode && mcsr != null && mcsr.supportsVideoPlaybackRate())
     {
       addYieldDecoderLock();
       synchronized (decoderLock)
@@ -3777,7 +3777,7 @@ public class MiniPlayer implements DVDMediaPlayer
     }
     catch(Exception e)
     {
-      if (Sage.DBG) System.out.println("Error setting Vibe MiniPlayer playback rate: " + e);
+      if (Sage.DBG) System.out.println("Error setting MiniPlayer playback rate: " + e);
       e.printStackTrace();
       connectionError();
       return 1.0f;

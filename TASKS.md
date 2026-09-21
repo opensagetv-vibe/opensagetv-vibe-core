@@ -18,8 +18,16 @@ in `CHANGELOG.md` and `HANDOFF.md`.
   stock `.175` remains untouched.
 - [ ] Address important remaining compiler/Gradle warnings in narrowly scoped,
   tested changes without enabling global `-Werror`.
-- [ ] Prepare an upstream-review branch, tag, release notes, and published
-  artifact after all local release gates pass.
+- [ ] Review the published `upstream-review/*` topic branches listed in
+  `docs/UPSTREAM_EVALUATION.md`, collect any required physical or cross-platform
+  evidence, and open OpenSageTV pull requests only after explicit approval.
+- [ ] Replace Core's temporary automatic XMLTV importer discovery/property
+  repair with a stock-compatible SageTV Standard plugin migration, then remove
+  the temporary Core policy after existing installations have a tested upgrade
+  path.
+- [ ] Submit DVD MIM transport only after OpenSageTV accepts the documented
+  `DVD_DISC_*` capability contract and the external FFmpeg/MIM provider,
+  fallback behavior, and physical disc gate can be reviewed together.
 - [ ] Create `docs/CLIENT_MODERNIZATION_AUDIT.md` covering the Java
   MiniClient/PlaceShifter, native Linux MiniClient, Windows client,
   launchers/installers, renderer/player backends, protocols, dependencies, and

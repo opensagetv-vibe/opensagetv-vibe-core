@@ -2,13 +2,37 @@
 
 ## Unreleased
 
+- Prepared and published twelve focused `upstream-review/*` branches from the
+  current OpenSageTV merge base. Generic Linux, network, native, build,
+  ImageLoader, shutdown, metadata, and DVD fixes are isolated from the optional
+  MiniClient capability proposal. No upstream pull request was opened. DVD MIM,
+  Vibe CI/release tooling, commissioning controls, and container policy remain
+  explicitly excluded until their separate contracts are appropriate for
+  upstream review.
+
+- Replaced the Vibe-branded DVD and playback-rate capability properties with
+  functional protocol names: `DVD_DISC_TRANSPORTS`, `DVD_DISC_POLICY`,
+  `DVD_DISC_SKIP_MENUS`, `DVD_DISC_SKIP_PREVIEWS`,
+  `DVD_DISC_NATIVE_FALLBACK`, and `VIDEO_PLAYBACK_RATE`. No deprecated
+  `VIBE_*` wire alias is retained; these optional extensions require a matched
+  updated Core and Android client while stock-server fallback remains intact.
+- Removed automatic XMLTV importer discovery/property repair from the proposed
+  upstream Core change set. The existing behavior is now explicitly classified
+  as temporary Vibe-only compatibility pending replacement by a
+  stock-compatible SageTV Standard plugin.
 - Added the measured Core/upstream/plugin evaluation for the stock-compatible
   Vibe Core MCP bridge. Stock `.175` retained its byte-identical `Sage.jar`
   while the separate plugin and Android adapter passed exact-path playback,
   seek, channel, caption, scan, watched-state, diagnostics, and physical
-  non-Pro playback/live-TV gates. Private events 230-232 are now deprecated
-  for commissioning use; irreducible DVD/caption/player protocol work remains
-  explicitly separated.
+  non-Pro playback/live-TV gates. Removed private commissioning events 230-232
+  and their Core handlers after the public `Watch`, `Seek`, and `ChannelSet`
+  replacements passed on stock `.175`. Event 233 was also removed after the
+  Android client replaced its DVD decoder-reload seek handshake with a local
+  Media3 Surface refresh that leaves the server stream untouched. Public
+  `Seek(long)` remains the tested automation and user-seek path; no private
+  commissioning event remains in Core. The post-removal clean Java/native/JNI/
+  ImageLoader/package/server gate passes; the resulting JAR is commissioned
+  only on isolated `.232`, with stock `.175` unchanged.
 - Routed `MiniDVDStreamTranscoder` through SageTV's existing
   `FFMPEGTranscoder.getTranscoderPath()` resolver instead of opening the stock
   `ffmpeg` path directly. This preserves SageTV's established
@@ -63,7 +87,7 @@
   protocol-3.0 endpoint returned real channel data across all queried scan
   indexes.
 - Added opt-in MiniClient playback-rate negotiation through
-  `VIBE_PLAYBACK_RATE` and media command 30. Supporting Pull clients receive
+  `VIDEO_PLAYBACK_RATE` and media command 30. Supporting Pull clients receive
   SageTV's existing Smooth FF/REW rate sequence; clients that omit or reject
   the property retain the established one-shot seek fallback. Empty and
   whitespace-only replies fail closed, and focused compatibility tests cover

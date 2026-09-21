@@ -18,16 +18,6 @@ package sage;
 public class MiniClientSageRenderer extends SageRenderer
     implements NativeImageAllocator
 {
-  static boolean shouldResumeVibeRedundantWatch(boolean sameFile, int playerState)
-  {
-    return sameFile && playerState != MediaPlayer.PLAY_STATE;
-  }
-
-  static boolean isValidVibeChannel(String channel)
-  {
-    return channel != null && channel.matches("[0-9]+(?:\\.[0-9]+)?");
-  }
-
   private static final boolean DEBUG_NATIVE2D = false;
   private static final boolean DEBUG_REMOTEFS = false;
   private java.nio.channels.SocketChannel clientSocket;
@@ -82,28 +72,6 @@ public class MiniClientSageRenderer extends SageRenderer
   public static final int IMAGE_UNLOAD_REPLY_TYPE = 226;
   public static final int OFFLINE_CACHE_CHANGE_REPLY_TYPE = 227;
   public static final int ASYNC_DIRECT_LOAD_COMPLETE = 228;  // int-handle, int-result(0 success)
-  /**
-   * OpenSageTV Vibe debug/commissioning extension. The payload is one UTF-8
-   * server-side path. It is ignored unless the server explicitly enables
-   * miniclient/enable_vibe_watch_file_event.
-   */
-  public static final int VIBE_WATCH_FILE_EVENT_REPLY_TYPE = 230;
-  /**
-   * OpenSageTV Vibe debug/commissioning extension. The payload is one UTF-8
-   * logical channel number (for example 2.1). It is ignored unless the server
-   * explicitly enables miniclient/enable_vibe_channel_set_event.
-   */
-  public static final int VIBE_CHANNEL_SET_EVENT_REPLY_TYPE = 231;
-  /**
-   * OpenSageTV Vibe debug/commissioning extension. This has the same UTF-8
-   * server-side path payload as {@link #VIBE_WATCH_FILE_EVENT_REPLY_TYPE}, but
-   * queues an absolute seek to the first media segment behind the watch job.
-   * A distinct event type keeps the original extension wire-compatible and
-   * lets older servers safely ignore the new request.
-   */
-  public static final int VIBE_WATCH_FILE_FROM_BEGINNING_EVENT_REPLY_TYPE = 232;
-  /** OpenSageTV Vibe commissioning extension: signed 64-bit seek target in milliseconds. */
-  public static final int VIBE_SEEK_EVENT_REPLY_TYPE = 233;
 
   public static final int GFXCMD_INIT = 1;
   // mode
@@ -3902,12 +3870,12 @@ public class MiniClientSageRenderer extends SageRenderer
         sendGetPropertyAsync("VIDEO_ADVANCED_ASPECT");
         sendGetPropertyAsync("MEDIA_STATE_URL");
         sendGetPropertyAsync("DVD_REMOTE_NAV");
-        sendGetPropertyAsync("VIBE_DISC_TRANSPORTS");
-        sendGetPropertyAsync("VIBE_DISC_POLICY");
-        sendGetPropertyAsync("VIBE_DISC_SKIP_MENUS");
-        sendGetPropertyAsync("VIBE_DISC_SKIP_PREVIEWS");
-        sendGetPropertyAsync("VIBE_DISC_NATIVE_FALLBACK");
-        sendGetPropertyAsync("VIBE_PLAYBACK_RATE");
+        sendGetPropertyAsync("DVD_DISC_TRANSPORTS");
+        sendGetPropertyAsync("DVD_DISC_POLICY");
+        sendGetPropertyAsync("DVD_DISC_SKIP_MENUS");
+        sendGetPropertyAsync("DVD_DISC_SKIP_PREVIEWS");
+        sendGetPropertyAsync("DVD_DISC_NATIVE_FALLBACK");
+        sendGetPropertyAsync("VIDEO_PLAYBACK_RATE");
         sendBufferNow();
         // Now get capabilities properties for this specific miniclient
         // The default is to use image maps for text rendering
@@ -4503,21 +4471,21 @@ public class MiniClientSageRenderer extends SageRenderer
         dvdRemoteNavigationSupport = dvdRemoteNavProp != null && "TRUE".equalsIgnoreCase(dvdRemoteNavProp);
         if (Sage.DBG) System.out.println("MiniClient DVD_REMOTE_NAV=" + dvdRemoteNavProp);
 
-        vibeDiscTransports = recvr.getStringReply();
-        if (vibeDiscTransports == null)
-          vibeDiscTransports = "";
-        if (Sage.DBG) System.out.println("MiniClient VIBE_DISC_TRANSPORTS=" + vibeDiscTransports);
+        dvdDiscTransports = recvr.getStringReply();
+        if (dvdDiscTransports == null)
+          dvdDiscTransports = "";
+        if (Sage.DBG) System.out.println("MiniClient DVD_DISC_TRANSPORTS=" + dvdDiscTransports);
 
-        vibeDiscPolicy = normalizeVibeDiscPolicy(recvr.getStringReply());
-        vibeDiscSkipMenus = "TRUE".equalsIgnoreCase(recvr.getStringReply());
-        vibeDiscSkipPreviews = "TRUE".equalsIgnoreCase(recvr.getStringReply());
-        vibeDiscNativeFallback = "TRUE".equalsIgnoreCase(recvr.getStringReply());
-        String vibePlaybackRateProp = recvr.getStringReply();
-        vibePlaybackRateSupport = isVibePlaybackRateSupported(vibePlaybackRateProp);
-        if (Sage.DBG) System.out.println("MiniClient Vibe DISC policy=" + vibeDiscPolicy +
-            " skipMenus=" + vibeDiscSkipMenus + " skipPreviews=" + vibeDiscSkipPreviews +
-            " nativeFallback=" + vibeDiscNativeFallback);
-        if (Sage.DBG) System.out.println("MiniClient VIBE_PLAYBACK_RATE=" + vibePlaybackRateProp);
+        dvdDiscPolicy = normalizeDvdDiscPolicy(recvr.getStringReply());
+        dvdDiscSkipMenus = "TRUE".equalsIgnoreCase(recvr.getStringReply());
+        dvdDiscSkipPreviews = "TRUE".equalsIgnoreCase(recvr.getStringReply());
+        dvdDiscNativeFallback = "TRUE".equalsIgnoreCase(recvr.getStringReply());
+        String videoPlaybackRateProp = recvr.getStringReply();
+        videoPlaybackRateSupport = isVideoPlaybackRateSupported(videoPlaybackRateProp);
+        if (Sage.DBG) System.out.println("MiniClient DVD DISC policy=" + dvdDiscPolicy +
+            " skipMenus=" + dvdDiscSkipMenus + " skipPreviews=" + dvdDiscSkipPreviews +
+            " nativeFallback=" + dvdDiscNativeFallback);
+        if (Sage.DBG) System.out.println("MiniClient VIDEO_PLAYBACK_RATE=" + videoPlaybackRateProp);
 
         if (advImageCaching)
         {
@@ -6612,12 +6580,12 @@ public class MiniClientSageRenderer extends SageRenderer
     return frameStepSupport;
   }
 
-  public boolean supportsVibePlaybackRate()
+  public boolean supportsVideoPlaybackRate()
   {
-    return vibePlaybackRateSupport;
+    return videoPlaybackRateSupport;
   }
 
-  static boolean isVibePlaybackRateSupported(String propertyValue)
+  static boolean isVideoPlaybackRateSupported(String propertyValue)
   {
     return propertyValue != null && propertyValue.trim().length() > 0;
   }
@@ -6627,16 +6595,16 @@ public class MiniClientSageRenderer extends SageRenderer
     return dvdRemoteNavigationSupport;
   }
 
-  public boolean supportsVibeDiscMimTransport()
+  public boolean supportsDvdDiscMimTransport()
   {
-    String[] transports = vibeDiscTransports.split(",");
+    String[] transports = dvdDiscTransports.split(",");
     for (int i = 0; i < transports.length; i++)
       if ("mim_ts_v1".equalsIgnoreCase(transports[i].trim()))
         return true;
     return false;
   }
 
-  static String normalizeVibeDiscPolicy(String value)
+  static String normalizeDvdDiscPolicy(String value)
   {
     if ("native".equalsIgnoreCase(value) || "hybrid".equalsIgnoreCase(value) ||
         "mim_main_feature".equalsIgnoreCase(value))
@@ -6644,10 +6612,10 @@ public class MiniClientSageRenderer extends SageRenderer
     return "auto";
   }
 
-  public String getVibeDiscPolicy() { return vibeDiscPolicy; }
-  public boolean isVibeDiscSkipMenus() { return vibeDiscSkipMenus; }
-  public boolean isVibeDiscSkipPreviews() { return vibeDiscSkipPreviews; }
-  public boolean isVibeDiscNativeFallback() { return vibeDiscNativeFallback; }
+  public String getDvdDiscPolicy() { return dvdDiscPolicy; }
+  public boolean isDvdDiscSkipMenus() { return dvdDiscSkipMenus; }
+  public boolean isDvdDiscSkipPreviews() { return dvdDiscSkipPreviews; }
+  public boolean isDvdDiscNativeFallback() { return dvdDiscNativeFallback; }
 
   public java.awt.Dimension getMaxClientResolution()
   {
@@ -7543,12 +7511,12 @@ public class MiniClientSageRenderer extends SageRenderer
   private boolean pushBufferSeeking;
   private boolean mediaStateUrlSupport;
   private boolean dvdRemoteNavigationSupport;
-  private String vibeDiscTransports = "";
-  private String vibeDiscPolicy = "auto";
-  private boolean vibeDiscSkipMenus;
-  private boolean vibeDiscSkipPreviews;
-  private boolean vibeDiscNativeFallback = true;
-  private boolean vibePlaybackRateSupport;
+  private String dvdDiscTransports = "";
+  private String dvdDiscPolicy = "auto";
+  private boolean dvdDiscSkipMenus;
+  private boolean dvdDiscSkipPreviews;
+  private boolean dvdDiscNativeFallback = true;
+  private boolean videoPlaybackRateSupport;
 
   private java.awt.Dimension maxClientResolution;
   private sage.media.format.VideoFormat displayResolution;
@@ -8154,284 +8122,6 @@ public class MiniClientSageRenderer extends SageRenderer
                 {
                   asyncLoadConfirms.notifyAll();
                 }
-                break;
-              case VIBE_WATCH_FILE_EVENT_REPLY_TYPE:
-              case VIBE_WATCH_FILE_FROM_BEGINNING_EVENT_REPLY_TYPE:
-                final boolean watchFromBeginning =
-                    replyType == VIBE_WATCH_FILE_FROM_BEGINNING_EVENT_REPLY_TYPE;
-                byte[] watchPathData;
-                if (replyData == null)
-                {
-                  watchPathData = new byte[dataLen];
-                  recvBuf.get(watchPathData);
-                }
-                else
-                  watchPathData = replyData;
-                if (!Sage.getBoolean("miniclient/enable_vibe_watch_file_event", false))
-                {
-                  if (Sage.DBG) System.out.println("Ignoring disabled Vibe MiniClient watch-file event");
-                  break;
-                }
-                if (watchPathData.length == 0 || watchPathData.length > 8192)
-                {
-                  System.out.println("Ignoring invalid Vibe MiniClient watch-file path length=" + watchPathData.length);
-                  break;
-                }
-                final String watchPath = new String(watchPathData, "UTF-8");
-                if (watchPath.indexOf(0) >= 0)
-                {
-                  System.out.println("Ignoring Vibe MiniClient watch-file path containing NUL");
-                  break;
-                }
-                Pooler.execute(new Runnable()
-                {
-                  public void run()
-                  {
-                    try
-                    {
-                      // A reconnect can deliver this private event after the new
-                      // MiniUI is visible but before its VideoFrame worker has
-                      // initialized Seeker. Calling watch() in that window causes
-                      // VideoFrame.watch() to dereference a null seeker. Wait for
-                      // the normal VideoFrame lifecycle instead of racing UI setup.
-                      long watchReadyDeadline = Sage.eventTime() + 15000;
-                      while (uiMgr.isAlive() && !vf.isReadyForWatchRequest() &&
-                          Sage.eventTime() < watchReadyDeadline)
-                      {
-                        try
-                        {
-                          Thread.sleep(25);
-                        }
-                        catch (InterruptedException e)
-                        {
-                          Thread.currentThread().interrupt();
-                          System.out.println("Vibe MiniClient watch-file interrupted while waiting for VideoFrame");
-                          return;
-                        }
-                      }
-                      if (!uiMgr.isAlive() || !vf.isReadyForWatchRequest())
-                      {
-                        System.out.println("Vibe MiniClient watch-file ignored because VideoFrame was not ready: " + watchPath);
-                        return;
-                      }
-                      MediaFile watchFile = Wizard.getInstance().getPlayableMediaFile(watchPath);
-                      if (watchFile == null)
-                      {
-                        System.out.println("Vibe MiniClient watch-file path is not an indexed playable MediaFile: " + watchPath);
-                        return;
-                      }
-                      if (Sage.DBG) System.out.println("Vibe MiniClient watch-file request path=" + watchPath);
-                      MediaFile currentWatchFile = vf.getCurrFile();
-                      boolean resumeRedundantWatch = shouldResumeVibeRedundantWatch(
-                          currentWatchFile == watchFile, vf.getPlayerState());
-                      int watchResult = watchFromBeginning &&
-                          (watchFile.isDVD() || watchFile.isBluRay()) ?
-                          vf.watchFromBeginning(watchFile) : vf.watch(watchFile);
-                      if (watchResult != 0)
-                        System.out.println("Vibe MiniClient watch-file failed result=" + watchResult + " path=" + watchPath);
-                      else
-                      {
-                        // watch() queues WATCH_MF. Queueing TIME_SET immediately
-                        // behind it lets LOAD_MF consume the absolute target before
-                        // opening the MiniPlayer, avoiding a visible resume-then-seek
-                        // and making repeated commissioning tests deterministic.
-                        if (watchFromBeginning)
-                        {
-                          long firstMediaTime = watchFile.getStart(0);
-                          if (firstMediaTime <= 0)
-                            firstMediaTime = watchFile.getRecordTime();
-                          vf.timeJump(firstMediaTime);
-                          if (Sage.DBG) System.out.println("Vibe MiniClient watch-file queued from beginning time=" +
-                              firstMediaTime + " path=" + watchPath);
-                        }
-                        // VideoFrame.watch() deliberately treats the current
-                        // MediaFile as a redundant request. After STOP or PAUSE
-                        // that returns WATCH_OK without queuing PLAY, leaving a
-                        // deterministic repeat request accepted but idle. This
-                        // behavior is scoped to the opt-in Vibe event: selecting
-                        // the same stopped file means resume it, while an
-                        // already-playing file is left alone.
-                        if (resumeRedundantWatch)
-                        {
-                          vf.play();
-                          if (Sage.DBG) System.out.println(
-                              "Vibe MiniClient watch-file resumed redundant stopped file path=" + watchPath);
-                        }
-                        // Watch() starts the player, but it does not execute the STV action
-                        // that normally enters full-screen playback after "Watch Now". Route
-                        // the standard TV user event through this same UI context so custom
-                        // STVs retain their normal playback-screen behavior. The MiniPlayer
-                        // load is asynchronous; issuing TV immediately after watch() races the
-                        // STV preview update and the event is ignored. Wait until the player is
-                        // active (or the bounded deadline expires) before entering its playback
-                        // screen.
-                        long fullScreenDeadline = Sage.eventTime() + 10000;
-                        while (uiMgr.isAlive() && vf.getPlayerState() != MediaPlayer.PLAY_STATE &&
-                            Sage.eventTime() < fullScreenDeadline)
-                        {
-                          try
-                          {
-                            Thread.sleep(25);
-                          }
-                          catch (InterruptedException e)
-                          {
-                            Thread.currentThread().interrupt();
-                            System.out.println("Vibe MiniClient watch-file interrupted before full-screen transition");
-                            return;
-                          }
-                        }
-                        // Give the STV one render cycle to bind its preview widget before the
-                        // TV event replaces it with the normal MediaPlayer OSD.
-                        try
-                        {
-                          Thread.sleep(200);
-                        }
-                        catch (InterruptedException e)
-                        {
-                          Thread.currentThread().interrupt();
-                          return;
-                        }
-                        // TV is a toggle in the SageTV7 STV. Sending it here while an MCP
-                        // client also verifies/promotes playback can produce two closely
-                        // spaced TV events: OSD -> Main Menu. Enter the canonical playback
-                        // menu directly on the UI event thread instead. This behavior is
-                        // scoped to the opt-in Vibe commissioning event and does not alter
-                        // ordinary remote-control or STV Watch behavior.
-                        uiMgr.getRouter().invokeLater(new Runnable()
-                        {
-                          public void run()
-                          {
-                            if (uiMgr.isAlive())
-                              uiMgr.advanceUI("MediaPlayer OSD");
-                          }
-                        });
-                        if (Sage.DBG) System.out.println(
-                            "Vibe MiniClient watch-file queued MediaPlayer OSD path=" + watchPath);
-                      }
-                    }
-                    catch (Throwable t)
-                    {
-                      System.out.println("Vibe MiniClient watch-file failed for " + watchPath + ": " + t);
-                      Sage.printStackTrace(t);
-                    }
-                  }
-                }, "VibeMiniClientWatchFile");
-                break;
-              case VIBE_CHANNEL_SET_EVENT_REPLY_TYPE:
-                byte[] channelData;
-                if (replyData == null)
-                {
-                  channelData = new byte[dataLen];
-                  recvBuf.get(channelData);
-                }
-                else
-                  channelData = replyData;
-                if (!Sage.getBoolean("miniclient/enable_vibe_channel_set_event", false))
-                {
-                  if (Sage.DBG) System.out.println("Ignoring disabled Vibe MiniClient channel-set event");
-                  break;
-                }
-                if (channelData.length == 0 || channelData.length > 32)
-                {
-                  System.out.println("Ignoring invalid Vibe MiniClient channel length=" + channelData.length);
-                  break;
-                }
-                final String requestedChannel = new String(channelData, "UTF-8");
-                if (!isValidVibeChannel(requestedChannel))
-                {
-                  System.out.println("Ignoring invalid Vibe MiniClient channel: " + requestedChannel);
-                  break;
-                }
-                Pooler.execute(new Runnable()
-                {
-                  public void run()
-                  {
-                    try
-                    {
-                      if (!uiMgr.isAlive() || !vf.isReadyForWatchRequest())
-                      {
-                        System.out.println("Vibe MiniClient channel-set ignored because VideoFrame was not ready: " + requestedChannel);
-                        return;
-                      }
-                      if (Sage.DBG) System.out.println("Vibe MiniClient channel-set request channel=" + requestedChannel);
-                      MediaFile currentFile = vf.getCurrFile();
-                      String currentChannel = currentFile == null || currentFile.getContentAiring() == null ? "" :
-                          currentFile.getContentAiring().getChannelNum(0);
-                      if (requestedChannel.equals(currentChannel))
-                      {
-                        // A new/reconnected MiniClient session can inherit the
-                        // VideoFrame's current live channel after the previous
-                        // Fixed stream has ended. Merely acknowledging that
-                        // channel leaves the new client with no replacement
-                        // MIM stream. This private deterministic tune request
-                        // must therefore reload the same channel as well.
-                        vf.reloadFile();
-                        int propertyResult = sendSetProperty("VIBE_CURRENT_CHANNEL", requestedChannel);
-                        if (propertyResult != 0)
-                          System.out.println("Vibe MiniClient current-channel acknowledgement failed result=" + propertyResult + " channel=" + requestedChannel);
-                        return;
-                      }
-                      int channelResult = vf.surfToChan(requestedChannel);
-                      if (channelResult != 0)
-                        System.out.println("Vibe MiniClient channel-set failed result=" + channelResult + " channel=" + requestedChannel);
-                      else
-                      {
-                        // Positively acknowledge the logical channel over the
-                        // existing MiniClient property channel. Push/Fixed
-                        // media URLs are only "push:" and otherwise cannot
-                        // prove which dotted ATSC station was accepted.
-                        int propertyResult = sendSetProperty("VIBE_CURRENT_CHANNEL", requestedChannel);
-                        if (propertyResult != 0)
-                          System.out.println("Vibe MiniClient channel acknowledgement failed result=" + propertyResult + " channel=" + requestedChannel);
-                      }
-                    }
-                    catch (Throwable t)
-                    {
-                      System.out.println("Vibe MiniClient channel-set failed for " + requestedChannel + ": " + t);
-                      Sage.printStackTrace(t);
-                    }
-                  }
-                }, "VibeMiniClientChannelSet");
-                break;
-              case VIBE_SEEK_EVENT_REPLY_TYPE:
-                byte[] seekData;
-                if (replyData == null)
-                {
-                  seekData = new byte[dataLen];
-                  recvBuf.get(seekData);
-                }
-                else
-                  seekData = replyData;
-                if (!Sage.getBoolean("miniclient/enable_vibe_watch_file_event", false))
-                {
-                  if (Sage.DBG) System.out.println("Ignoring disabled Vibe MiniClient seek event");
-                  break;
-                }
-                if (seekData.length != 8)
-                {
-                  System.out.println("Ignoring invalid Vibe MiniClient seek payload length=" + seekData.length);
-                  break;
-                }
-                long requestedVibeSeek = 0;
-                for (int seekByte = 0; seekByte < 8; seekByte++)
-                  requestedVibeSeek = (requestedVibeSeek << 8) | (seekData[seekByte] & 0xFFL);
-                if (requestedVibeSeek < 0)
-                {
-                  System.out.println("Ignoring negative Vibe MiniClient seek target=" + requestedVibeSeek);
-                  break;
-                }
-                final long vibeSeekTarget = requestedVibeSeek;
-                Pooler.execute(new Runnable()
-                {
-                  public void run()
-                  {
-                    if (uiMgr.isAlive())
-                    {
-                      if (Sage.DBG) System.out.println("Vibe MiniClient server seek target=" + vibeSeekTarget);
-                      vf.timeJump(vibeSeekTarget);
-                    }
-                  }
-                }, "VibeMiniClientSeek");
                 break;
               case REMOTE_FS_HOTPLUG_INSERT_EVENT_REPLY_TYPE:
               case REMOTE_FS_HOTPLUG_REMOVE_EVENT_REPLY_TYPE:
