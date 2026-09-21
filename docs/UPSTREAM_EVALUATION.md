@@ -1,8 +1,8 @@
 # OpenSageTV Vibe Core upstream evaluation
 
-**Evaluation date:** 2026-09-20  
-**Repository:** `opensagetv-vibe-core`  
-**Upstream:** `OpenSageTV/sagetv`  
+**Evaluation date:** 2026-09-20
+**Repository:** `opensagetv-vibe-core`
+**Upstream:** `OpenSageTV/sagetv`
 **Merge base:** `e95c495d5d5948b8db7f78f4cdc7c563440162ab`
 
 ## Purpose
