@@ -16,19 +16,18 @@ final class MiniDVDPlayerSelection
   }
 
   static boolean shouldUseServerNavigation(boolean remoteNavigationSupport, String inputDevices,
-      String discPolicy, boolean nativeFallback, boolean mimTransportAvailable)
+      String discPolicy, boolean nativeFallback, boolean transformAvailable)
   {
     boolean unavailableExplicitMode = ("hybrid".equals(discPolicy) ||
-        "mim_main_feature".equals(discPolicy)) && !mimTransportAvailable && !nativeFallback;
+        "transformed_main_feature".equals(discPolicy)) && !transformAvailable && !nativeFallback;
     return !unavailableExplicitMode &&
         shouldUseServerNavigation(remoteNavigationSupport, inputDevices);
   }
 
-  static boolean shouldUseMimTransport(String discPolicy, boolean clientSupportsTransport,
-      boolean serverMimAvailable)
+  static boolean shouldUseTransform(String discPolicy, boolean transformAvailable)
   {
-    return ("hybrid".equals(discPolicy) || "mim_main_feature".equals(discPolicy)) &&
-        clientSupportsTransport && serverMimAvailable;
+    return ("hybrid".equals(discPolicy) || "transformed_main_feature".equals(discPolicy)) &&
+        transformAvailable;
   }
 
   /** Select the VM-owned button after a DVD NAV/program-chain transition. */
@@ -60,7 +59,7 @@ final class MiniDVDPlayerSelection
       return false;
     MiniClientSageRenderer mini = (MiniClientSageRenderer) renderer;
     return mini.supportsRemoteDVDNavigation() &&
-        (mini.isDvdDiscSkipMenus() || "mim_main_feature".equals(mini.getDvdDiscPolicy()));
+        (mini.isDvdDiscSkipMenus() || "transformed_main_feature".equals(mini.getDvdDiscPolicy()));
   }
 
   static boolean clientRequestsPreviewSkip(SageRenderer renderer)

@@ -5041,7 +5041,7 @@ public final class VideoFrame extends BasicVideoFrame implements Runnable
             if (!MiniDVDPlayerSelection.shouldUseServerNavigation(
                 dvdRenderer.supportsRemoteDVDNavigation(), dvdRenderer.getInputDevsProp(),
                 dvdRenderer.getDvdDiscPolicy(), dvdRenderer.isDvdDiscNativeFallback(),
-                dvdRenderer.supportsDvdDiscMimTransport() && MiniDVDStreamTranscoder.isAvailable()))
+                DVDStreamTransformRegistry.findAvailable(dvdRenderer.getDvdDiscTransports()) != null))
               return false;
           }
           return true;
@@ -5156,7 +5156,7 @@ public final class VideoFrame extends BasicVideoFrame implements Runnable
           if (!MiniDVDPlayerSelection.shouldUseServerNavigation(
               dvdRenderer.supportsRemoteDVDNavigation(), dvdRenderer.getInputDevsProp(),
               dvdRenderer.getDvdDiscPolicy(), dvdRenderer.isDvdDiscNativeFallback(),
-              dvdRenderer.supportsDvdDiscMimTransport() && MiniDVDStreamTranscoder.isAvailable()))
+              DVDStreamTransformRegistry.findAvailable(dvdRenderer.getDvdDiscTransports()) != null))
             return new MiniPlayer();
         }
         try

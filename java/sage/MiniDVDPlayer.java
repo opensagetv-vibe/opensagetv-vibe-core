@@ -125,8 +125,8 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
       reader.close();
       reader = null;
     }
-    closeMimTranscoder();
-    mimTransportActive = false;
+    closeDiscTransform();
+    discTransformActive = false;
     pushThread = null;
     if (unmountRequired != null)
     {
@@ -255,12 +255,15 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
       if (render.isMediaExtender() && render.isSupportedVideoCodec("MPEG2-VIDEO@HL"))
         hdMediaExtender = true;
       supportsFrameStep = render.supportsFrameStep();
-      mimNativeFallback = render.isDvdDiscNativeFallback();
-      mimTransportRequested = MiniDVDPlayerSelection.shouldUseMimTransport(
-          render.getDvdDiscPolicy(), render.supportsDvdDiscMimTransport(),
-          MiniDVDStreamTranscoder.isAvailable());
+      discNativeFallback = render.isDvdDiscNativeFallback();
+      discTransformProvider = DVDStreamTransformRegistry.findAvailable(
+          render.getDvdDiscTransports());
+      discTransformRequested = MiniDVDPlayerSelection.shouldUseTransform(
+          render.getDvdDiscPolicy(), discTransformProvider != null);
       if (Sage.DBG) System.out.println("DVD transport policy=" + render.getDvdDiscPolicy() +
-          " mimRequested=" + mimTransportRequested + " nativeFallback=" + mimNativeFallback);
+          " transformRequested=" + discTransformRequested + " provider=" +
+          (discTransformProvider == null ? "none" : discTransformProvider.getTransportId()) +
+          " nativeFallback=" + discNativeFallback);
     }
 
     currState = NO_STATE;
@@ -1122,7 +1125,7 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                 {}
                 // A control operation (pause, seek, stop, media-time query,
                 // etc.) is waiting for this monitor. Do not reacquire it and
-                // continue into DVD parsing, FFmpeg input, or socket writes in
+                // continue into DVD parsing, transform input, or socket writes in
                 // the same iteration; yield the monitor at the end of this
                 // synchronized block and let the control operation run.
                 continue;
@@ -1158,7 +1161,7 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
               }
               if (freeSpace < 32768 || dvdEos)
               {
-                if (mimTransportActive && dvdEos && !finishMimSegment(getFlags()))
+                if (discTransformActive && dvdEos && !finishDiscTransformSegment(getFlags()))
                   break;
                 if (!pushBuffer0(ptr, null, dvdEos ? (0x80 | getFlags()) : getFlags()))
                 {
@@ -1206,19 +1209,19 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                   if (debugPush) System.out.println("sending data len: "+readBufferSize);
                   boolean pushed;
                   // A DVD VM can enter title domain before it emits a CELL/DATA
-                  // payload.  Do not open an empty MIM stream at that point: an
-                  // immediate EMPTY event closes FFmpeg without enough bytes to
-                  // probe and makes the MiniClient see an empty MPEG-TS segment.
+                  // payload. Do not open an empty transform at that point: an
+                  // immediate EMPTY event can close the provider before it has
+                  // enough input to produce a valid output segment.
                   // Activate the transformed transport only when this first
                   // real title payload is ready to be written.
-                  if (!mimTransportActive && mimTransportRequested &&
+                  if (!discTransformActive && discTransformRequested &&
                       reader != null && reader.getDVDDomain() == 4 &&
-                      !activateMimTransportForPayload())
+                      !activateDiscTransformForPayload())
                     break;
-                  if (mimTransportActive)
+                  if (discTransformActive)
                   {
-                    pushed = writeMimInput(javaBuff, 0, readBufferSize) &&
-                        pushMimOutput(flags, 0);
+                    pushed = writeDiscTransformInput(javaBuff, 0, readBufferSize) &&
+                        pushDiscTransformOutput(flags, 0);
                   }
                   else
                   {
@@ -1267,7 +1270,7 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                     if (DEBUG_MINIDVD) System.out.println("Need to pause for "+ (retcode&0xFF) + " seconds");
                     if(pausetime==0) // new pause
                     {
-                      if (mimTransportActive && !finishMimSegment(getFlags()))
+                      if (discTransformActive && !finishDiscTransformSegment(getFlags()))
                         break;
                       if (!pushBuffer0(ptr, null, 0x100))
                       {
@@ -1299,7 +1302,7 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                     try { Thread.sleep(200); } catch(Exception e) {}
                     continue;
                   case DVDReader.DVD_PROCESS_EMPTY:
-                    if (mimTransportActive && !finishMimSegment(getFlags()))
+                    if (discTransformActive && !finishDiscTransformSegment(getFlags()))
                       break;
                     if (!pushBuffer0(ptr, null, 0x100))
                     {
@@ -1350,7 +1353,7 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                       try { Thread.sleep(200); } catch(Exception e) {}
                     continue;
                   case DVDReader.DVD_PROCESS_FLUSH:
-                    if (mimTransportActive && !finishMimSegment(getFlags()))
+                    if (discTransformActive && !finishDiscTransformSegment(getFlags()))
                       break;
                     flushPush0(ptr);
                     updateSTC=true;
@@ -1767,81 +1770,108 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
   /** Switch only the media representation; the Java/Ogle DVD VM remains authoritative. */
   private boolean updateDiscTransportForDomain()
   {
-    boolean wantMim = mimTransportRequested && reader != null && reader.getDVDDomain() == 4;
-    if (wantMim == mimTransportActive)
+    boolean wantTransform = discTransformRequested && reader != null && reader.getDVDDomain() == 4;
+    if (wantTransform == discTransformActive)
       return true;
     // Entering title domain is not proof that the VM has media ready. Some
     // discs report an EMPTY transition before their first CELL/DATA event.
-    // Defer MIM OPENURL/FFmpeg startup until the data path has a payload.
-    if (wantMim)
+    // Defer provider startup until the data path has a payload.
+    if (wantTransform)
       return true;
     try
     {
-      if (mimTransportActive && !finishMimSegment(0))
+      if (discTransformActive && !finishDiscTransformSegment(0))
         return false;
       flushPush0(ptr);
-      String transportUrl = "push:dvd?vibe_transport=native&format=mpegps";
+      String transportUrl = "push:dvd?disc_transport=native&format=mpegps";
       if (!openURL0(ptr, transportUrl))
         throw new java.io.IOException("MiniClient rejected " + transportUrl);
-      mimTransportActive = wantMim;
+      discTransformActive = wantTransform;
       freeSpace = 4 * 1024 * 1024;
       if (Sage.DBG) System.out.println("DVD media transport switched to native MPEG-PS");
       return true;
     }
     catch (java.io.IOException e)
     {
-      return handleMimFailure(e);
+      return handleDiscTransformFailure(e);
     }
   }
 
-  /** Open MIM only after the DVD VM has supplied a real title payload. */
-  private boolean activateMimTransportForPayload()
+  /** Open the optional provider only after the DVD VM supplies a real payload. */
+  private boolean activateDiscTransformForPayload()
   {
-    if (mimTransportActive)
+    if (discTransformActive)
       return true;
     try
     {
+      if (discTransformProvider == null)
+        throw new java.io.IOException("DVD stream transform provider is unavailable");
       flushPush0(ptr);
-      String transportUrl = "push:dvd?vibe_transport=mim_ts_v1&format=mpegts";
+      String transportId = discTransformProvider.getTransportId();
+      String outputFormat = discTransformProvider.getOutputFormat();
+      if (!transportId.matches("[A-Za-z0-9_.-]+") || outputFormat == null ||
+          !outputFormat.matches("[A-Za-z0-9_.-]+"))
+        throw new java.io.IOException("DVD stream transform provider returned invalid metadata");
+      // Prove the optional provider can start before changing the client's
+      // expected wire representation. A startup failure then leaves the
+      // established native transport untouched.
+      DVDStreamTransform openedTransform = openDiscTransform();
+      String transportUrl = "push:dvd?disc_transport=" + transportId +
+          "&format=" + outputFormat;
       if (!openURL0(ptr, transportUrl))
+      {
+        openedTransform.close();
         throw new java.io.IOException("MiniClient rejected " + transportUrl);
-      mimTransportActive = true;
+      }
+      discTransform = openedTransform;
+      discTransformActive = true;
       freeSpace = 4 * 1024 * 1024;
-      dvdTranscoder = MiniDVDStreamTranscoder.start();
       if (Sage.DBG) System.out.println(
-          "DVD media transport switched to MIM MPEG-TS on first title payload");
+          "DVD media transport switched to provider " + transportId +
+          " on first title payload");
       return true;
     }
     catch (java.io.IOException e)
     {
-      return handleMimFailure(e);
+      return handleDiscTransformFailure(e);
     }
   }
 
-  private boolean writeMimInput(byte[] data, int offset, int length)
+  private DVDStreamTransform openDiscTransform() throws java.io.IOException
+  {
+    if (discTransformProvider == null)
+      throw new java.io.IOException("DVD stream transform provider is unavailable");
+    DVDStreamTransformRequest request = new DVDStreamTransformRequest(
+        discTransformProvider.getTransportId(),
+        Sage.get("miniclient/dvd_transform_video_bitrate",
+            Sage.get("miniclient/dvd_mim_video_bitrate", "6M")));
+    return discTransformProvider.open(request);
+  }
+
+  private boolean writeDiscTransformInput(byte[] data, int offset, int length)
   {
     try
     {
-      if (dvdTranscoder == null)
-        dvdTranscoder = MiniDVDStreamTranscoder.start();
-      dvdTranscoder.write(data, offset, length);
+      if (discTransform == null)
+        discTransform = openDiscTransform();
+      discTransform.write(data, offset, length);
       return true;
     }
     catch (java.io.IOException e)
     {
-      return handleMimFailure(e);
+      return handleDiscTransformFailure(e);
     }
   }
 
   /** Push all currently available transformed output; wait only when requested. */
-  private boolean pushMimOutput(int firstFlags, long firstWaitMillis)
+  private boolean pushDiscTransformOutput(int firstFlags, long firstWaitMillis)
   {
-    if (dvdTranscoder == null)
+    if (discTransform == null)
       return true;
     boolean first = true;
     try
     {
-      byte[] chunk = dvdTranscoder.pollOutput(firstWaitMillis);
+      byte[] chunk = discTransform.pollOutput(firstWaitMillis);
       while (chunk != null)
       {
         while (freeSpace >= 0 && freeSpace < chunk.length)
@@ -1857,22 +1887,22 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
         if (!pushBuffer0(ptr, java.nio.ByteBuffer.wrap(chunk), first ? firstFlags : 0))
           return false;
         first = false;
-        chunk = dvdTranscoder.pollOutput(0);
+        chunk = discTransform.pollOutput(0);
       }
       return true;
     }
     catch (java.io.IOException e)
     {
-      return handleMimFailure(e);
+      return handleDiscTransformFailure(e);
     }
   }
 
-  /** Finish one finite VM segment so FFmpeg releases delayed frames and trailers. */
-  private boolean finishMimSegment(int firstFlags)
+  /** Finish one finite VM segment so the provider releases delayed output. */
+  private boolean finishDiscTransformSegment(int firstFlags)
   {
-    if (dvdTranscoder == null)
+    if (discTransform == null)
       return true;
-    MiniDVDStreamTranscoder finishing = dvdTranscoder;
+    DVDStreamTransform finishing = discTransform;
     try
     {
       finishing.closeInput();
@@ -1900,37 +1930,37 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
     }
     catch (java.io.IOException e)
     {
-      return handleMimFailure(e);
+      return handleDiscTransformFailure(e);
     }
     finally
     {
       finishing.close();
-      if (dvdTranscoder == finishing)
-        dvdTranscoder = null;
+      if (discTransform == finishing)
+        discTransform = null;
     }
   }
 
-  private boolean handleMimFailure(java.io.IOException failure)
+  private boolean handleDiscTransformFailure(java.io.IOException failure)
   {
-    System.out.println("DVD MIM transport failed: " + failure);
-    closeMimTranscoder();
-    if (!mimNativeFallback)
+    System.out.println("DVD stream transform failed: " + failure);
+    closeDiscTransform();
+    if (!discNativeFallback)
       return false;
-    mimTransportRequested = false;
-    mimTransportActive = false;
+    discTransformRequested = false;
+    discTransformActive = false;
     flushPush0(ptr);
     boolean restored = openURL0(ptr,
-        "push:dvd?vibe_transport=native&format=mpegps&fallback=mim_failure");
+        "push:dvd?disc_transport=native&format=mpegps&fallback=transform_failure");
     if (Sage.DBG) System.out.println("DVD native compatibility fallback restored=" + restored);
     return restored;
   }
 
-  private void closeMimTranscoder()
+  private void closeDiscTransform()
   {
-    if (dvdTranscoder != null)
+    if (discTransform != null)
     {
-      dvdTranscoder.close();
-      dvdTranscoder = null;
+      discTransform.close();
+      discTransform = null;
     }
   }
 
@@ -2253,10 +2283,11 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
   protected long pausestart = 0;
   private sage.dvd.VM reader;
   protected Thread pushThread;
-  private MiniDVDStreamTranscoder dvdTranscoder;
-  private boolean mimTransportRequested;
-  private boolean mimTransportActive;
-  private boolean mimNativeFallback = true;
+  private DVDStreamTransform discTransform;
+  private DVDStreamTransformProvider discTransformProvider;
+  private boolean discTransformRequested;
+  private boolean discTransformActive;
+  private boolean discNativeFallback = true;
 
   private boolean needToPlay;
   int numPushedBuffers = 0;

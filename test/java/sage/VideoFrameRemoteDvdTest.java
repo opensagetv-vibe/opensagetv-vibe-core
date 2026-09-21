@@ -2,8 +2,6 @@ package sage;
 
 import org.testng.annotations.Test;
 
-import java.io.File;
-
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
@@ -30,7 +28,7 @@ public class VideoFrameRemoteDvdTest
     assertFalse(MiniDVDPlayerSelection.shouldUseServerNavigation(
         false, "IR,TV", "hybrid", false, false));
     assertFalse(MiniDVDPlayerSelection.shouldUseServerNavigation(
-        false, "IR,TV", "mim_main_feature", false, false));
+        false, "IR,TV", "transformed_main_feature", false, false));
     assertTrue(MiniDVDPlayerSelection.shouldUseServerNavigation(
         true, "IR,TV", "hybrid", true, false));
     assertTrue(MiniDVDPlayerSelection.shouldUseServerNavigation(
@@ -40,13 +38,12 @@ public class VideoFrameRemoteDvdTest
   }
 
   @Test
-  public void mimTransportRequiresBothNegotiatedEnds()
+  public void transformRequiresExplicitPolicyAndAvailableProvider()
   {
-    assertTrue(MiniDVDPlayerSelection.shouldUseMimTransport("hybrid", true, true));
-    assertTrue(MiniDVDPlayerSelection.shouldUseMimTransport("mim_main_feature", true, true));
-    assertFalse(MiniDVDPlayerSelection.shouldUseMimTransport("auto", true, true));
-    assertFalse(MiniDVDPlayerSelection.shouldUseMimTransport("hybrid", false, true));
-    assertFalse(MiniDVDPlayerSelection.shouldUseMimTransport("hybrid", true, false));
+    assertTrue(MiniDVDPlayerSelection.shouldUseTransform("hybrid", true));
+    assertTrue(MiniDVDPlayerSelection.shouldUseTransform("transformed_main_feature", true));
+    assertFalse(MiniDVDPlayerSelection.shouldUseTransform("auto", true));
+    assertFalse(MiniDVDPlayerSelection.shouldUseTransform("hybrid", false));
   }
 
   @Test
@@ -78,48 +75,39 @@ public class VideoFrameRemoteDvdTest
   {
     assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy("native"), "native");
     assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy("HYBRID"), "hybrid");
-    assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy("mim_main_feature"), "mim_main_feature");
+    assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy("transformed_main_feature"),
+        "transformed_main_feature");
     assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy("future-mode"), "auto");
     assertEquals(MiniClientSageRenderer.normalizeDvdDiscPolicy(null), "auto");
   }
 
   @Test
-  public void mimCapabilityProbeRequiresTheExplicitBooleanToken()
+  public void transportIntersectionIsExactAndCaseInsensitive()
   {
-    assertTrue(MiniDVDStreamTranscoder.capabilitiesAdvertiseTransform(
-        "{\"mimVersion\":\"0.4.8\",\"dvdStreamTransform\":true}"));
-    assertFalse(MiniDVDStreamTranscoder.capabilitiesAdvertiseTransform(
-        "{\"dvdStreamTransform\":false}"));
-    assertFalse(MiniDVDStreamTranscoder.capabilitiesAdvertiseTransform(null));
+    assertTrue(DVDStreamTransformRegistry.supportsTransport(
+        "native,dvd_mpegts_v1", "dvd_mpegts_v1"));
+    assertTrue(DVDStreamTransformRegistry.supportsTransport(
+        "NATIVE, DVD_MPEGTS_V1", "dvd_mpegts_v1"));
+    assertFalse(DVDStreamTransformRegistry.supportsTransport(
+        "native,dvd_mpegts_v10", "dvd_mpegts_v1"));
+    assertFalse(DVDStreamTransformRegistry.supportsTransport(null,
+        "dvd_mpegts_v1"));
   }
 
   @Test
-  public void dvdMimUsesTheStockSageTvTranscoderPreference() throws Exception
+  public void transformRequestBoundsInvalidBitrate()
   {
-    String originalToolsPath = System.getProperty("sage.paths.tools");
-    File tools = File.createTempFile("sagetv-dvd-mim-tools", "");
-    assertTrue(tools.delete());
-    assertTrue(tools.mkdirs());
-    try
-    {
-      System.setProperty("sage.paths.tools", tools.getAbsolutePath());
-      File stock = new File(Sage.getToolPath("ffmpeg"));
-      File bridge = new File(Sage.getToolPath("SageTVTranscoder"));
-      assertTrue(stock.createNewFile());
-      assertTrue(bridge.createNewFile());
+    assertEquals(new DVDStreamTransformRequest("dvd_mpegts_v1", "8M")
+        .getVideoBitrate(), "8M");
+    assertEquals(new DVDStreamTransformRequest("dvd_mpegts_v1", "bad value")
+        .getVideoBitrate(), "6M");
+  }
 
-      assertEquals(MiniDVDStreamTranscoder.resolveTranscoderTool().getCanonicalFile(),
-          bridge.getCanonicalFile());
-    }
-    finally
-    {
-      if (originalToolsPath == null)
-        System.clearProperty("sage.paths.tools");
-      else
-        System.setProperty("sage.paths.tools", originalToolsPath);
-      new File(tools, Sage.WINDOWS_OS ? "ffmpeg.exe" : "ffmpeg").delete();
-      new File(tools, Sage.WINDOWS_OS ? "SageTVTranscoder.exe" : "SageTVTranscoder").delete();
-      tools.delete();
-    }
+  @Test
+  public void optionalProviderIsDiscoveredOnlyForNegotiatedTransport()
+  {
+    assertEquals(DVDStreamTransformRegistry.findAvailable(
+        "native,test_transform_v1").getTransportId(), "test_transform_v1");
+    assertEquals(DVDStreamTransformRegistry.findAvailable("native"), null);
   }
 }
