@@ -49,6 +49,7 @@ in comments.
 | `upstream-review/dvd-runtime-correctness` | `ff8cce29` | focused Java tests | Validate physical DVD gate |
 | `upstream-review/dvd-main-feature-selection` | `58020ee3` | complete Java suite | Validate broader disc corpus |
 | `upstream-review/miniclient-capability-protocol` | `a2cadb3e` | focused Java protocol tests | Protocol review required |
+| `upstream-review/dvd-transform-provider` | `0e80c46b` | complete Java suite and `sageJar` on the explicit six-commit stack | Protocol/design review; stacked after the four DVD topics and capability protocol |
 
 No pull request has been opened. Branch publication creates reviewable source
 without representing that OpenSageTV has accepted a behavior or protocol.
@@ -90,7 +91,8 @@ Changes requiring separate physical evidence and review:
   the clock.
 - Select the main feature with the longest valid first-referenced PGC.
 
-The Vibe Native/Hybrid/MIM transport is not part of these generic fixes.
+The Vibe Native/Hybrid/optional-transform transport is not part of these
+generic fixes.
 
 ### Shutdown completion hardening — Validate
 
@@ -151,7 +153,7 @@ accepts a documented capability negotiation and compatibility contract:
 - `VIDEO_PLAYBACK_RATE`
 - `VIDEO_CC_STATE` and any new caption/subtitle payload delivery
 - MiniPlayer media command 30 for negotiated playback rate
-- Native/Hybrid/MIM DVD transport and `MiniDVDStreamTranscoder`
+- Native/Hybrid DVD policy and the optional `DVDStreamTransformProvider` SPI
 
 Old private commissioning reply events 230–233 have been removed from Core.
 They are not upstream proposals. Exact watch, tune, and seek operations can use
@@ -195,17 +197,30 @@ The Vibe Core delta should converge toward:
 3. No private commissioning-only MiniClient events.
 4. No secrets, local paths, user databases, or deployment state in Core.
 
+## Staged protocol/design topic
+
+### Optional DVD stream transform
+
+Core now exposes a provider-neutral `DVDStreamTransformProvider` SPI instead of
+embedding `MiniDVDStreamTranscoder`. The Core half has no MIM/FFmpeg imports,
+executable names, private command-line switches, capability JSON, or process
+management. It discovers providers through the existing extension classloader,
+requires an exact `DVD_DISC_TRANSPORTS` intersection, and otherwise stays on
+native DVD. An in-memory test provider proves the Core build/runtime contract
+without external software.
+
+The separately packaged FFmpeg plugin implements `dvd_mpegts_v1` and owns all
+MIM behavior. Its Standard-plugin entry point remains loadable on stock Core;
+only updated Core discovers the lazy SPI implementation. The review source is
+published as `upstream-review/dvd-transform-provider` at `0e80c46b`. It is an
+explicit six-commit stack over upstream `e95c495d`: DVD VM safety, path
+normalization, runtime correctness, main-feature selection, MiniClient
+capability negotiation, then the provider SPI. This ordering is intentional;
+the final commit is not a standalone patch and must not be proposed before the
+`DVD_DISC_*` contract is accepted. Plugin and physical-disc evidence should be
+linked as integration evidence, not introduced as Core dependencies.
+
 ## Changes deliberately not staged as standalone upstream code
-
-### DVD MIM transport
-
-`MiniDVDStreamTranscoder`, Native/Hybrid/MIM switching, and the transcoder
-resolver depend on both an accepted `DVD_DISC_*` capability contract and an
-external FFmpeg/MIM provider. Extracting only the Core half would create a mode
-that compiles but cannot satisfy its runtime contract. Keep it in Vibe until
-the capability proposal is accepted; then submit it as a second, stacked pull
-request with the external dependency, fallback states, and physical disc
-evidence documented together.
 
 ### Repository workflow changes
 

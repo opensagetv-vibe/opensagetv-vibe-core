@@ -2,13 +2,24 @@
 
 ## Unreleased
 
-- Prepared and published thirteen focused `upstream-review/*` branches from the
+- Replaced the Core-owned `MiniDVDStreamTranscoder` MIM/FFmpeg process bridge
+  with the provider-neutral `DVDStreamTransformProvider` SPI. Providers are
+  discovered through SageTV's existing extension classloader and
+  `ServiceLoader`, selected only when their output transport intersects the
+  connected client's `DVD_DISC_TRANSPORTS`, and may fail without preventing
+  native DVD playback. Core no longer contains MIM capability JSON, custom
+  FFmpeg flags, executable resolution, or transform process management. The
+  in-memory provider test proves the Core contract without external software.
+  The generic transformed transport is `dvd_mpegts_v1`; the former MIM-specific
+  token and policy value are no longer emitted.
+- Prepared and published fourteen focused `upstream-review/*` branches from the
   current OpenSageTV merge base. Generic Linux, network, native, build,
   ImageLoader, shutdown, metadata, and DVD fixes are isolated from the optional
-  MiniClient capability proposal. No upstream pull request was opened. DVD MIM,
-  Vibe CI/release tooling, commissioning controls, and container policy remain
-  explicitly excluded until their separate contracts are appropriate for
-  upstream review.
+  MiniClient capability proposal. The provider-neutral DVD transform is an
+  explicit six-commit stack at `upstream-review/dvd-transform-provider`, not a
+  standalone patch. No upstream pull request was opened. The external MIM/
+  FFmpeg implementation, Vibe CI/release tooling, commissioning controls, and
+  container policy remain outside Core upstream review.
 
 - Replaced the Vibe-branded DVD and playback-rate capability properties with
   functional protocol names: `DVD_DISC_TRANSPORTS`, `DVD_DISC_POLICY`,
@@ -33,14 +44,6 @@
   commissioning event remains in Core. The post-removal clean Java/native/JNI/
   ImageLoader/package/server gate passes; the resulting JAR is commissioned
   only on isolated `.232`, with stock `.175` unchanged.
-- Routed `MiniDVDStreamTranscoder` through SageTV's existing
-  `FFMPEGTranscoder.getTranscoderPath()` resolver instead of opening the stock
-  `ffmpeg` path directly. This preserves SageTV's established
-  `SageTVTranscoder`-first behavior, allowing the optional Vibe FFmpeg plugin
-  bridge to serve negotiated DVD MIM main-feature playback without replacing
-  stock `ffmpeg`. A focused regression proves bridge precedence, and the
-  complete Core Java/native/JNI/package/server gate passes. The updated Core
-  was commissioned only on isolated `.232`; stock `.175` was not modified.
 - Restored executable Git metadata for the maintained Ubuntu/Linux Core test
   suite and added a repository-CI guard so direct Linux execution cannot regress.
 - Updated the read-only repository workflow to the current Node 24-based

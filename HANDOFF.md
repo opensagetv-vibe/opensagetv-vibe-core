@@ -1,5 +1,31 @@
 # Core handoff
 
+## Provider-neutral DVD transform SPI (2026-09-20)
+
+Core no longer owns or launches a MIM/FFmpeg DVD transcoder. The public
+`DVDStreamTransformProvider`, `DVDStreamTransform`, and
+`DVDStreamTransformRequest` contracts describe only a bounded byte transform;
+the internal registry discovers implementations through `ServiceLoader` on
+`Sage.extClassLoader`. Selection requires an exact intersection with the
+client's `DVD_DISC_TRANSPORTS`. Missing, malformed, unavailable, and failing
+providers leave or restore the native Java/Ogle DVD path.
+
+The generic output token is `dvd_mpegts_v1`, and the provider-neutral
+main-feature policy is `transformed_main_feature`. The FFmpeg plugin owns the
+MIM capability probe, custom command line, child process, queues, and teardown.
+Its service class is lazy, so the same plugin JAR continues to load on an
+unmodified stock SageTV server where the SPI does not exist. Focused tests and
+the complete clean Java/native/JNI/ImageLoader/package build pass with a
+test-only in-memory provider and no external executable. The resulting
+`build/release/Sage.jar` SHA-256 is
+`a8788a30b52f200d62970874768b3b727d35aeccbe9dff4d90d4de7c65aee9bd`.
+
+The upstream review source is published only to the Vibe fork as
+`upstream-review/dvd-transform-provider` at `0e80c46b`. It is a deliberate
+six-commit stack over `e95c495d`: the four DVD correctness topics, MiniClient
+capability negotiation, and finally the provider-neutral SPI. Its complete
+Java suite and `sageJar` gate pass. No OpenSageTV pull request was opened.
+
 ## Functional MiniClient capability names (2026-09-20)
 
 Core now queries `DVD_DISC_TRANSPORTS`, `DVD_DISC_POLICY`,
@@ -44,14 +70,12 @@ The plugin cannot replace native/hybrid/MIM DVD transport, media command 30,
 or DVD VM behavior. See `docs/UPSTREAM_EVALUATION.md` for the upstream-only
 change assessment.
 
-## DVD MIM plugin-resolver commissioning (2026-09-20)
+## Historical DVD MIM commissioning evidence (2026-09-20)
 
-`MiniDVDStreamTranscoder` now resolves its executable through the same stock
-`FFMPEGTranscoder.getTranscoderPath()` path used by ordinary SageTV
-transcoding. This fixes an integration defect where negotiated DVD MIM bypassed
-the installed `SageTVTranscoder` plugin bridge and tried stock `ffmpeg`
-directly. Focused coverage proves `SageTVTranscoder` wins when present, and the
-complete clean Core Java/native/JNI/package/server gate passes.
+The first physical transform gate used the former Core-owned
+`MiniDVDStreamTranscoder` and stock transcoder resolver. That code has been
+removed. Current Core owns only the provider-neutral SPI documented above; the
+FFmpeg plugin owns the complete MIM capability, command, and process boundary.
 
 The resulting `Sage.jar` SHA-256 is
 `8d146702c1a8d5361c815ae925b9bf9a3a768ee0414e1011c7a198a419e741cb`.
@@ -64,10 +88,10 @@ byte-identical with SHA-256
 Non-Pro Fire TV `.25` physically passed the generated authored DVD through
 explicit MIM main-feature policy: VAAPI `h264_vaapi` server encoding, Android
 hardware AVC decoding, 1.002x cadence, zero dropped frames, and recovery after
-pause/play, FF, REW, and chapter-up. This optional DVD integration requires the
-updated Vibe Core because unmodified stock Core has no DVD-to-plugin transform
-hook; ordinary prerecorded/live plugin transcoding remains stock-Sage.jar
-compatible.
+pause/play, FF, REW, and chapter-up. This evidence remains valid for the media
+path. Optional transformed DVD playback requires updated Core because
+unmodified stock Core has no provider discovery hook; ordinary prerecorded/
+live plugin transcoding remains stock-Sage.jar compatible.
 
 ## Pending opt-in imported-metadata and shutdown gate
 
@@ -120,20 +144,22 @@ not modified.
 
 ## Upstream review staging
 
-Thirteen focused `upstream-review/*` branches are published on the Vibe fork.
+Fourteen focused `upstream-review/*` branches are published on the Vibe fork.
 They cover the Linux launcher, network encoder discovery, native GCC/64-bit
 compatibility, source-clean builds, Ubuntu 26/ImageLoader modernization,
 shutdown hardening, imported metadata repair, four independent DVD correctness
-topics, and the optional MiniClient capability protocol. The earlier combined
-network branch remains only as a superseded reference. Exact branch names,
-commits, validation, dependencies, and exclusions are recorded in
+topics, the optional MiniClient capability protocol, and the explicitly
+stacked provider-neutral DVD transform topic. The earlier combined network
+branch remains only as a superseded reference. Exact branch names, commits,
+validation, dependencies, and exclusions are recorded in
 `docs/UPSTREAM_EVALUATION.md`.
 
 No pull request has been opened against `OpenSageTV/sagetv`. The review branches
 must not be merged as one omnibus change. Generic fixes are independent;
 protocol, timing, metadata, and DVD behavior retain their explicit validation
-requirements. DVD MIM remains Vibe-only until its capability and external
-FFmpeg provider can be reviewed as a complete stacked contract.
+requirements. The optional DVD transform branch is reviewable source, not an
+accepted protocol; it remains Vibe runtime behavior until reviewed with the
+separate plugin and physical-disc integration evidence.
 
 The fork exists publicly with inherited upstream history retained on `master`
 and reviewed Vibe work on the default `main` branch. Complete source, Docker,

@@ -25,9 +25,10 @@ in `CHANGELOG.md` and `HANDOFF.md`.
   repair with a stock-compatible SageTV Standard plugin migration, then remove
   the temporary Core policy after existing installations have a tested upgrade
   path.
-- [ ] Submit DVD MIM transport only after OpenSageTV accepts the documented
-  `DVD_DISC_*` capability contract and the external FFmpeg/MIM provider,
-  fallback behavior, and physical disc gate can be reviewed together.
+- [x] Stage the provider-neutral DVD transform SPI as the explicit stacked
+  `upstream-review/dvd-transform-provider` topic. The external FFmpeg/MIM
+  provider remains in its plugin repository; opening an upstream pull request
+  still waits for explicit approval and `DVD_DISC_*` protocol review.
 - [ ] Create `docs/CLIENT_MODERNIZATION_AUDIT.md` covering the Java
   MiniClient/PlaceShifter, native Linux MiniClient, Windows client,
   launchers/installers, renderer/player backends, protocols, dependencies, and
