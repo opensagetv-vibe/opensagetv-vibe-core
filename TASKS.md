@@ -18,9 +18,10 @@ in `CHANGELOG.md` and `HANDOFF.md`.
   stock `.175` remains untouched.
 - [ ] Address important remaining compiler/Gradle warnings in narrowly scoped,
   tested changes without enabling global `-Werror`.
-- [ ] Review the published `upstream-review/*` topic branches listed in
-  `docs/UPSTREAM_EVALUATION.md`, collect any required physical or cross-platform
-  evidence, and open OpenSageTV pull requests only after explicit approval.
+- [ ] Track review of OpenSageTV PRs #1-#6 and collect the physical,
+  cross-platform, or design evidence required for the remaining published
+  `upstream-review/*` branches. Do not submit validation-dependent or protocol
+  branches without separate readiness and approval.
 - [ ] Replace Core's temporary automatic XMLTV importer discovery/property
   repair with a stock-compatible SageTV Standard plugin migration, then remove
   the temporary Core policy after existing installations have a tested upgrade

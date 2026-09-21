@@ -51,8 +51,23 @@ in comments.
 | `upstream-review/miniclient-capability-protocol` | `a2cadb3e` | focused Java protocol tests | Protocol review required |
 | `upstream-review/dvd-transform-provider` | `0e80c46b` | complete Java suite and `sageJar` on the explicit six-commit stack | Protocol/design review; stacked after the four DVD topics and capability protocol |
 
-No pull request has been opened. Branch publication creates reviewable source
-without representing that OpenSageTV has accepted a behavior or protocol.
+OpenSageTV pull requests opened on 2026-09-20 after explicit approval:
+
+- [#1 Linux server launcher](https://github.com/OpenSageTV/sagetv/pull/1)
+- [#2 Network encoder identity](https://github.com/OpenSageTV/sagetv/pull/2)
+- [#3 MiniClient discovery interface](https://github.com/OpenSageTV/sagetv/pull/3)
+- [#4 Source-clean build state](https://github.com/OpenSageTV/sagetv/pull/4)
+- [#5 DVD VM link safety](https://github.com/OpenSageTV/sagetv/pull/5)
+- [#6 DVD path normalization](https://github.com/OpenSageTV/sagetv/pull/6)
+
+The upstream repository currently reports no automated checks for these head
+branches. Their recorded local gates therefore remain the available validation
+evidence until upstream review or CI adds another result.
+
+The remaining branch publication creates reviewable source without representing
+that OpenSageTV has accepted a behavior or protocol. No validation-dependent,
+native-modernization, metadata, shutdown, or MiniClient protocol branch has
+been submitted yet.
 The older `upstream-review/network-encoder-discovery` branch is retained as a
 non-destructive reference but is superseded by the two narrower network rows
 above and should not be used for a pull request.

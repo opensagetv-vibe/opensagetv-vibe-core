@@ -154,8 +154,14 @@ branch remains only as a superseded reference. Exact branch names, commits,
 validation, dependencies, and exclusions are recorded in
 `docs/UPSTREAM_EVALUATION.md`.
 
-No pull request has been opened against `OpenSageTV/sagetv`. The review branches
-must not be merged as one omnibus change. Generic fixes are independent;
+After explicit approval, six independent pull requests were opened against
+`OpenSageTV/sagetv:master`: #1 Linux launcher, #2 network encoder identity,
+#3 MiniClient discovery interface, #4 source-clean builds, #5 DVD VM safety,
+and #6 DVD path normalization. Upstream currently reports no automated checks
+on those PR heads, so their documented local gates remain the available
+evidence. The other review branches have not been submitted.
+
+The review branches must not be merged as one omnibus change. Generic fixes are independent;
 protocol, timing, metadata, and DVD behavior retain their explicit validation
 requirements. The optional DVD transform branch is reviewable source, not an
 accepted protocol; it remains Vibe runtime behavior until reviewed with the

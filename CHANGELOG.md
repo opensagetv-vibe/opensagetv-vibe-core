@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Opened six independent upstream pull requests for the ready Linux launcher,
+  network encoder identity, MiniClient discovery-interface, source-clean build,
+  DVD VM safety, and DVD path-normalization topics. Validation-dependent and
+  protocol branches remain staged on the Vibe fork and were not submitted.
+
 - Replaced the Core-owned `MiniDVDStreamTranscoder` MIM/FFmpeg process bridge
   with the provider-neutral `DVDStreamTransformProvider` SPI. Providers are
   discovered through SageTV's existing extension classloader and
