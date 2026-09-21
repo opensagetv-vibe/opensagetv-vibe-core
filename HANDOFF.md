@@ -120,11 +120,12 @@ not modified.
 
 ## Upstream review staging
 
-Twelve focused `upstream-review/*` branches are published on the Vibe fork.
+Thirteen focused `upstream-review/*` branches are published on the Vibe fork.
 They cover the Linux launcher, network encoder discovery, native GCC/64-bit
 compatibility, source-clean builds, Ubuntu 26/ImageLoader modernization,
 shutdown hardening, imported metadata repair, four independent DVD correctness
-topics, and the optional MiniClient capability protocol. Exact branch names,
+topics, and the optional MiniClient capability protocol. The earlier combined
+network branch remains only as a superseded reference. Exact branch names,
 commits, validation, dependencies, and exclusions are recorded in
 `docs/UPSTREAM_EVALUATION.md`.
 

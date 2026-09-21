@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-- Prepared and published twelve focused `upstream-review/*` branches from the
+- Prepared and published thirteen focused `upstream-review/*` branches from the
   current OpenSageTV merge base. Generic Linux, network, native, build,
   ImageLoader, shutdown, metadata, and DVD fixes are isolated from the optional
   MiniClient capability proposal. No upstream pull request was opened. DVD MIM,

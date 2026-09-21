@@ -37,7 +37,8 @@ in comments.
 | Branch | Commit | Gate | Status |
 |---|---:|---|---|
 | `upstream-review/linux-server-launcher` | `37af7d52` | `bash -n` | Ready |
-| `upstream-review/network-encoder-discovery` | `c04f9d7e` | complete Java test suite | Ready |
+| `upstream-review/network-encoder-identity` | `603c5e27` | complete Java test suite | Ready |
+| `upstream-review/miniclient-discovery-interface` | `33009960` | complete Java test suite | Ready |
 | `upstream-review/native-gcc15-64bit` | `bb44040b` | Java suite; native build reaches the known legacy bundled-JPEG baseline failure | Review with modernization stack |
 | `upstream-review/build-source-clean` | `69b14839` | complete Java suite; source restored after compile | Ready |
 | `upstream-review/ubuntu26-imageloader` | `4f8dcf15` | Java, all native libraries, JNI/ELF, ImageLoader fixtures, packaging, and smoke gate | Ready as a four-commit stack on the native branch |
@@ -51,6 +52,9 @@ in comments.
 
 No pull request has been opened. Branch publication creates reviewable source
 without representing that OpenSageTV has accepted a behavior or protocol.
+The older `upstream-review/network-encoder-discovery` branch is retained as a
+non-destructive reference but is superseded by the two narrower network rows
+above and should not be used for a pull request.
 
 ## Recommended upstream pull requests
 
