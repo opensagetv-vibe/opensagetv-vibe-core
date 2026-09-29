@@ -39,9 +39,9 @@ in comments.
 | `sagetv-review/linux-server-launcher` | `53729439` | `bash -n` | Ready |
 | `sagetv-review/network-encoder-identity` | `6310ec98` | complete Java test suite | Ready |
 | `sagetv-review/miniclient-discovery-interface` | `7d2df3ef` | complete Java test suite | Ready |
-| `sagetv-review/native-gcc15-64bit` | `3562ba29` | Java suite; native build reaches the known legacy bundled-JPEG baseline failure | Review with modernization stack |
+| `sagetv-review/native-gcc15-64bit` | `da9c75f5` | Java suite; native build reaches the known legacy bundled-JPEG baseline failure | Review with modernization stack |
 | `sagetv-review/build-source-clean` | `60d2ae51` | complete Java suite; source restored after compile | Ready |
-| `sagetv-review/ubuntu26-imageloader` | `704cdfbb` | Java, all native libraries, JNI/ELF, ImageLoader fixtures, packaging, and smoke gate | Ready as a four-commit stack on the native branch |
+| `sagetv-review/ubuntu26-imageloader` | `081763da` | Java, all native libraries, JNI/ELF, ImageLoader fixtures, packaging, and smoke gate | Ready as a four-commit stack on the native branch |
 | `sagetv-review/shutdown-hardening` | `7d2368aa` | complete Java suite | Validate failure injection |
 | `sagetv-review/imported-metadata-repair` | `dad176ef` | focused Java tests | Validate physical malformed-import gate |
 | `sagetv-review/dvd-vm-safety` | `aa6d903c` | focused Java tests | Ready |

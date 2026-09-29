@@ -1,0 +1,33 @@
+{
+  "target_repository": "google/sagetv",
+  "base_branch": "master",
+  "upstream_remote": "upstream",
+  "head_owner": "opensagetv-vibe",
+  "expected_identity": {
+    "name": "jzhvymetal",
+    "email": "jzhvymetal@users.noreply.github.com"
+  },
+  "forbidden_targets": [
+    "OpenSageTV/sagetv"
+  ],
+  "required_pilot_checks": [
+    "check-changes",
+    "cla/google"
+  ],
+  "topics": [
+    {"pr": 516, "pilot": true, "draft": false, "branch": "sagetv-review/linux-server-launcher", "reference_branch": "upstream-review/linux-server-launcher"},
+    {"pr": 517, "draft": false, "branch": "sagetv-review/network-encoder-identity", "reference_branch": "upstream-review/network-encoder-identity"},
+    {"pr": 518, "draft": false, "branch": "sagetv-review/miniclient-discovery-interface", "reference_branch": "upstream-review/miniclient-discovery-interface"},
+    {"pr": 519, "draft": false, "branch": "sagetv-review/build-source-clean", "reference_branch": "upstream-review/build-source-clean"},
+    {"pr": 520, "draft": false, "branch": "sagetv-review/dvd-vm-safety", "reference_branch": "upstream-review/dvd-vm-safety"},
+    {"pr": 521, "draft": false, "branch": "sagetv-review/dvd-path-normalization", "reference_branch": "upstream-review/dvd-path-normalization"},
+    {"pr": 522, "draft": true, "branch": "sagetv-review/shutdown-hardening", "reference_branch": "upstream-review/shutdown-hardening"},
+    {"pr": 523, "draft": true, "branch": "sagetv-review/imported-metadata-repair", "reference_branch": "upstream-review/imported-metadata-repair"},
+    {"pr": 524, "draft": true, "branch": "sagetv-review/dvd-main-feature-selection", "reference_branch": "upstream-review/dvd-main-feature-selection"},
+    {"pr": 525, "draft": true, "branch": "sagetv-review/miniclient-capability-protocol", "reference_branch": "upstream-review/miniclient-capability-protocol"},
+    {"pr": 526, "draft": true, "branch": "sagetv-review/dvd-runtime-correctness", "reference_branch": "upstream-review/dvd-runtime-correctness"},
+    {"pr": 527, "draft": true, "branch": "sagetv-review/dvd-transform-provider", "reference_branch": "upstream-review/dvd-transform-provider"},
+    {"pr": 528, "draft": true, "branch": "sagetv-review/native-gcc15-64bit", "reference_branch": "upstream-review/native-gcc15-64bit"},
+    {"pr": 529, "draft": true, "branch": "sagetv-review/ubuntu26-imageloader", "reference_branch": "upstream-review/ubuntu26-imageloader"}
+  ]
+}

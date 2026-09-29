@@ -48,3 +48,10 @@ Use `origin` for `opensagetv-vibe/opensagetv-vibe-core` and a read-only
 remote, but do not target it for Core pull requests. Keep modernization commits
 reviewable and avoid mixing unrelated formatting or application-behavior
 changes.
+
+Before opening a canonical Core pull request, run
+`python3 tests/upstream-review/preflight.py`. For a multi-PR submission, open
+only the configured pilot first and require
+`python3 tests/upstream-review/preflight.py --require-pilot-green` to pass
+before creating another PR. Never bypass the pilot for a CLA, identity, target,
+or ancestry failure.

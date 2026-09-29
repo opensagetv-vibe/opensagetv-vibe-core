@@ -35,6 +35,29 @@ Before pushing or tagging a release candidate:
 7. Push the reviewed modernization branch. Create a tag or GitHub release only
    after the branch and packaged artifact reproduce the recorded report.
 
+## Canonical upstream pull-request gate
+
+Never open an upstream Core PR batch directly. First run:
+
+```bash
+python3 tests/upstream-review/preflight.py
+```
+
+The manifest-driven preflight rejects an incorrect target/base, stale or
+unpushed branch, non-canonical merge base, wrong author or committer email,
+changed patch boundary, whitespace error, duplicate intermediate-fork PR, or
+GitHub compare mismatch. Open only the manifest's pilot PR after that passes.
+Then run:
+
+```bash
+python3 tests/upstream-review/preflight.py --require-pilot-green
+```
+
+Do not open any remaining PR until both `check-changes` and `cla/google` pass on
+the pilot. Submit the rest one at a time and stop immediately on a failed
+required check. This makes a new external-account problem produce at most one
+failure notification instead of one notification per topic.
+
 The GitHub Actions workflow performs read-only repository checks. It does not
 replace the Ubuntu 26 Docker build and has no release credentials or deployment
 step.

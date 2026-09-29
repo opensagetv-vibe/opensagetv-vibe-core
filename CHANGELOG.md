@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- Added a fail-closed canonical upstream PR preflight and topic manifest. It
+  verifies target/base, current ancestry, remote heads, reviewed patch shape,
+  author/committer identity, forbidden-target duplicates, GitHub compare state,
+  and existing PR metadata before submission. Batch submission now requires a
+  single pilot PR to pass both `check-changes` and `cla/google` before another
+  PR may be opened.
+- Normalized the unmerged GCC/64-bit and Ubuntu/ImageLoader topic authors to the
+  verified GitHub noreply identity without changing their source patches.
+
 - Rebased all fourteen isolated upstream topics onto current canonical
   `google/sagetv:master` and opened SageTV Core pull requests #516-#529. The six
   ready topics are review-ready; the eight validation-, protocol-, and
