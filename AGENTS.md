@@ -9,6 +9,11 @@ system-libpng behavior, LF executable files, and the one unified Docker
 environment. Never commit output, user configuration, credentials, recordings,
 or databases. Root launchers must work from any caller directory.
 
+Release validation is impact-based: rerun only gates the release changes could
+affect. Do not repeat unrelated completed gates. Run the full gate suite only
+when the user explicitly requests it or a broad dependency/architecture change
+requires it, and document that reason and scope.
+
 
 ## Stock-server test-control policy
 
