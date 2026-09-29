@@ -18,18 +18,18 @@ in `CHANGELOG.md` and `HANDOFF.md`.
   stock `.175` remains untouched.
 - [ ] Address important remaining compiler/Gradle warnings in narrowly scoped,
   tested changes without enabling global `-Werror`.
-- [ ] Track review of OpenSageTV PRs #1-#6 and collect the physical,
-  cross-platform, or design evidence required for the remaining published
-  `upstream-review/*` branches. Do not submit validation-dependent or protocol
-  branches without separate readiness and approval.
+- [ ] Track review of canonical `google/sagetv` PRs #516-#529 and collect the
+  physical, cross-platform, or design evidence required to promote the eight
+  draft topics when their gates pass. Keep the six ready topics independent;
+  do not represent draft protocol or validation work as accepted behavior.
 - [ ] Replace Core's temporary automatic XMLTV importer discovery/property
   repair with a stock-compatible SageTV Standard plugin migration, then remove
   the temporary Core policy after existing installations have a tested upgrade
   path.
-- [x] Stage the provider-neutral DVD transform SPI as the explicit stacked
-  `upstream-review/dvd-transform-provider` topic. The external FFmpeg/MIM
-  provider remains in its plugin repository; opening an upstream pull request
-  still waits for explicit approval and `DVD_DISC_*` protocol review.
+- [x] Stage and submit the provider-neutral DVD transform SPI as the explicit
+  stacked `sagetv-review/dvd-transform-provider` draft topic. The external
+  FFmpeg/MIM provider remains in its plugin repository; canonical PR #527 still
+  requires `DVD_DISC_*` protocol/design review before promotion.
 - [ ] Create `docs/CLIENT_MODERNIZATION_AUDIT.md` covering the Java
   MiniClient/PlaceShifter, native Linux MiniClient, Windows client,
   launchers/installers, renderer/player backends, protocols, dependencies, and

@@ -1,14 +1,14 @@
 # OpenSageTV Vibe Core upstream evaluation
 
-**Evaluation date:** 2026-09-20
+**Evaluation date:** 2026-09-29
 **Repository:** `opensagetv-vibe-core`
-**Upstream:** `OpenSageTV/sagetv`
-**Merge base:** `e95c495d5d5948b8db7f78f4cdc7c563440162ab`
+**Upstream:** `google/sagetv`
+**Merge base:** `2e5a892703eaf1f56b1efb7f509021377e65ab69`
 
 ## Purpose
 
 This document identifies Vibe Core changes that can be proposed to the main
-OpenSageTV repository. It deliberately excludes Vibe commissioning tooling,
+SageTV Core repository. It deliberately excludes Vibe commissioning tooling,
 deployment architecture, and external automation design. Each upstream change
 should be isolated, tested, and reviewed on its own merits.
 
@@ -27,46 +27,46 @@ protocol work, project packaging, and removal of historical assets.
 
 ## Prepared review branches
 
-All branches below are published to the Vibe fork, not to the OpenSageTV
-repository. Except where noted, each is one commit based directly on
-`e95c495d` so reviewers can inspect, test, accept, or reject it independently.
+All branches below are published to the Vibe fork, not directly to the
+canonical repository. Except where noted, each is one commit based directly on
+`2e5a8927` so reviewers can inspect, test, accept, or reject it independently.
 Production changes include comments explaining non-obvious compatibility and
 failure behavior; tests use descriptive names rather than repeating the code
 in comments.
 
 | Branch | Commit | Gate | Status |
 |---|---:|---|---|
-| `upstream-review/linux-server-launcher` | `37af7d52` | `bash -n` | Ready |
-| `upstream-review/network-encoder-identity` | `603c5e27` | complete Java test suite | Ready |
-| `upstream-review/miniclient-discovery-interface` | `33009960` | complete Java test suite | Ready |
-| `upstream-review/native-gcc15-64bit` | `bb44040b` | Java suite; native build reaches the known legacy bundled-JPEG baseline failure | Review with modernization stack |
-| `upstream-review/build-source-clean` | `69b14839` | complete Java suite; source restored after compile | Ready |
-| `upstream-review/ubuntu26-imageloader` | `4f8dcf15` | Java, all native libraries, JNI/ELF, ImageLoader fixtures, packaging, and smoke gate | Ready as a four-commit stack on the native branch |
-| `upstream-review/shutdown-hardening` | `c7514f29` | complete Java suite | Validate failure injection |
-| `upstream-review/imported-metadata-repair` | `5ee83871` | focused Java tests | Validate physical malformed-import gate |
-| `upstream-review/dvd-vm-safety` | `060547c1` | focused Java tests | Ready |
-| `upstream-review/dvd-path-normalization` | `e18cd425` | focused Java tests | Ready |
-| `upstream-review/dvd-runtime-correctness` | `ff8cce29` | focused Java tests | Validate physical DVD gate |
-| `upstream-review/dvd-main-feature-selection` | `58020ee3` | complete Java suite | Validate broader disc corpus |
-| `upstream-review/miniclient-capability-protocol` | `a2cadb3e` | focused Java protocol tests | Protocol review required |
-| `upstream-review/dvd-transform-provider` | `0e80c46b` | complete Java suite and `sageJar` on the explicit six-commit stack | Protocol/design review; stacked after the four DVD topics and capability protocol |
+| `sagetv-review/linux-server-launcher` | `53729439` | `bash -n` | Ready |
+| `sagetv-review/network-encoder-identity` | `6310ec98` | complete Java test suite | Ready |
+| `sagetv-review/miniclient-discovery-interface` | `7d2df3ef` | complete Java test suite | Ready |
+| `sagetv-review/native-gcc15-64bit` | `3562ba29` | Java suite; native build reaches the known legacy bundled-JPEG baseline failure | Review with modernization stack |
+| `sagetv-review/build-source-clean` | `60d2ae51` | complete Java suite; source restored after compile | Ready |
+| `sagetv-review/ubuntu26-imageloader` | `704cdfbb` | Java, all native libraries, JNI/ELF, ImageLoader fixtures, packaging, and smoke gate | Ready as a four-commit stack on the native branch |
+| `sagetv-review/shutdown-hardening` | `7d2368aa` | complete Java suite | Validate failure injection |
+| `sagetv-review/imported-metadata-repair` | `dad176ef` | focused Java tests | Validate physical malformed-import gate |
+| `sagetv-review/dvd-vm-safety` | `aa6d903c` | focused Java tests | Ready |
+| `sagetv-review/dvd-path-normalization` | `2ce6419d` | focused Java tests | Ready |
+| `sagetv-review/dvd-runtime-correctness` | `e0bda13b` | focused Java tests | Validate physical DVD gate |
+| `sagetv-review/dvd-main-feature-selection` | `79792c19` | complete Java suite | Validate broader disc corpus |
+| `sagetv-review/miniclient-capability-protocol` | `a1201460` | focused Java protocol tests | Protocol review required |
+| `sagetv-review/dvd-transform-provider` | `bf211a8c` | complete Java suite and `sageJar` on the explicit six-commit stack | Protocol/design review; stacked after the four DVD topics and capability protocol |
 
-OpenSageTV pull requests opened on 2026-09-20 after explicit approval:
+Canonical SageTV pull requests opened on 2026-09-29 after explicit approval:
 
-- [#1 Linux server launcher](https://github.com/OpenSageTV/sagetv/pull/1)
-- [#2 Network encoder identity](https://github.com/OpenSageTV/sagetv/pull/2)
-- [#3 MiniClient discovery interface](https://github.com/OpenSageTV/sagetv/pull/3)
-- [#4 Source-clean build state](https://github.com/OpenSageTV/sagetv/pull/4)
-- [#5 DVD VM link safety](https://github.com/OpenSageTV/sagetv/pull/5)
-- [#6 DVD path normalization](https://github.com/OpenSageTV/sagetv/pull/6)
-- [#7 Shutdown completion hardening (draft)](https://github.com/OpenSageTV/sagetv/pull/7)
-- [#8 Invalid imported-media metadata repair (draft)](https://github.com/OpenSageTV/sagetv/pull/8)
-- [#9 DVD main-feature selection (draft)](https://github.com/OpenSageTV/sagetv/pull/9)
-- [#10 MiniClient capability protocol (draft)](https://github.com/OpenSageTV/sagetv/pull/10)
-- [#11 DVD runtime correctness (draft)](https://github.com/OpenSageTV/sagetv/pull/11)
-- [#12 Optional DVD stream-transform provider (draft)](https://github.com/OpenSageTV/sagetv/pull/12)
-- [#13 GCC 15 and 64-bit native compatibility (draft)](https://github.com/OpenSageTV/sagetv/pull/13)
-- [#14 Ubuntu 26 and ImageLoader modernization (draft)](https://github.com/OpenSageTV/sagetv/pull/14)
+- [#516 Linux server launcher](https://github.com/google/sagetv/pull/516)
+- [#517 Network encoder identity](https://github.com/google/sagetv/pull/517)
+- [#518 MiniClient discovery interface](https://github.com/google/sagetv/pull/518)
+- [#519 Source-clean build state](https://github.com/google/sagetv/pull/519)
+- [#520 DVD VM link safety](https://github.com/google/sagetv/pull/520)
+- [#521 DVD path normalization](https://github.com/google/sagetv/pull/521)
+- [#522 Shutdown completion hardening (draft)](https://github.com/google/sagetv/pull/522)
+- [#523 Invalid imported-media metadata repair (draft)](https://github.com/google/sagetv/pull/523)
+- [#524 DVD main-feature selection (draft)](https://github.com/google/sagetv/pull/524)
+- [#525 MiniClient capability protocol (draft)](https://github.com/google/sagetv/pull/525)
+- [#526 DVD runtime correctness (draft)](https://github.com/google/sagetv/pull/526)
+- [#527 Optional DVD stream-transform provider (draft)](https://github.com/google/sagetv/pull/527)
+- [#528 GCC 15 and 64-bit native compatibility (draft)](https://github.com/google/sagetv/pull/528)
+- [#529 Ubuntu 26 and ImageLoader modernization (draft)](https://github.com/google/sagetv/pull/529)
 
 The upstream repository currently reports no automated checks for these head
 branches. Their recorded local gates therefore remain the available validation
@@ -75,7 +75,7 @@ evidence until upstream review or CI adds another result.
 Every current, non-superseded review branch has now been submitted. The eight
 validation-, native-modernization-, metadata-, shutdown-, and protocol-dependent
 topics are drafts so their publication creates reviewable source without
-representing that OpenSageTV has accepted the behavior or protocol.
+representing that SageTV has accepted the behavior or protocol.
 The older `upstream-review/network-encoder-discovery` branch is retained as a
 non-destructive reference but is superseded by the two narrower network rows
 above and should not be used for a pull request.
@@ -235,8 +235,8 @@ without external software.
 The separately packaged FFmpeg plugin implements `dvd_mpegts_v1` and owns all
 MIM behavior. Its Standard-plugin entry point remains loadable on stock Core;
 only updated Core discovers the lazy SPI implementation. The review source is
-published as `upstream-review/dvd-transform-provider` at `0e80c46b`. It is an
-explicit six-commit stack over upstream `e95c495d`: DVD VM safety, path
+published as `sagetv-review/dvd-transform-provider` at `bf211a8c`. It is an
+explicit six-commit stack over canonical `2e5a8927`: DVD VM safety, path
 normalization, runtime correctness, main-feature selection, MiniClient
 capability negotiation, then the provider SPI. This ordering is intentional;
 the final commit is not a standalone patch and must not be proposed before the

@@ -1,8 +1,10 @@
 # OpenSageTV Vibe Core - Ubuntu 26 / Java 11
 
-This repository is the OpenSageTV Vibe fork of
-[`OpenSageTV/sagetv`](https://github.com/OpenSageTV/sagetv). It preserves the
-upstream Git history and contains the modernized Linux server source. The
+This repository is the OpenSageTV Vibe fork in the
+[`google/sagetv`](https://github.com/google/sagetv) SageTV fork network. Its
+immediate GitHub parent is `OpenSageTV/sagetv`, while canonical Core pull
+requests target `google/sagetv`. It preserves the upstream Git history and
+contains the modernized Linux server source. The
 repository and package identifier remain `opensagetv-vibe-core`; SageTV's Java,
 JNI, protocol, and runtime identities are retained for compatibility. The
 default development target is Ubuntu 26.04, amd64, and OpenJDK 11. The

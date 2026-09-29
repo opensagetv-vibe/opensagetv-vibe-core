@@ -15,7 +15,9 @@ test/validate/build/install. Create a changed-files package with
 ## Fork and publication workflow
 
 The canonical repository name is `opensagetv-vibe-core`. Its `origin` is the
-OpenSageTV Vibe fork and its read-only `upstream` is `OpenSageTV/sagetv`.
+OpenSageTV Vibe fork and its read-only `upstream` is the canonical SageTV Core
+repository, `google/sagetv`. `OpenSageTV/sagetv` is an intermediate fork and is
+not the pull-request target.
 Never configure the inherited `build/deploy.sh` as branch CI: it belongs to the
 historical upstream release process and is not the Vibe publisher.
 

@@ -20,8 +20,8 @@ test-only in-memory provider and no external executable. The resulting
 `build/release/Sage.jar` SHA-256 is
 `a8788a30b52f200d62970874768b3b727d35aeccbe9dff4d90d4de7c65aee9bd`.
 
-The upstream review source is published only to the Vibe fork as
-`upstream-review/dvd-transform-provider` at `0e80c46b`. It is a deliberate
+The canonical upstream review source is published to the Vibe fork as
+`sagetv-review/dvd-transform-provider` at `bf211a8c`. It is a deliberate
 six-commit stack over `e95c495d`: the four DVD correctness topics, MiniClient
 capability negotiation, and finally the provider-neutral SPI. Its complete
 Java suite and `sageJar` gate pass. No OpenSageTV pull request was opened.
@@ -134,17 +134,18 @@ not modified.
 ## Repository identity
 
 - GitHub repository: `opensagetv-vibe/opensagetv-vibe-core`
-- Fork parent: `OpenSageTV/sagetv`
-- Historical source lineage: `google/sagetv`
+- Immediate GitHub fork parent: `OpenSageTV/sagetv`
+- Canonical SageTV Core upstream and pull-request target: `google/sagetv`
 - Read-only repository CI uses the current `actions/checkout@v7`; it does not
   build, deploy, publish, or modify external systems.
 - Vibe default/development branch: `main`
 - `origin`: writable Vibe fork
-- `upstream`: read-only original OpenSageTV repository
+- `upstream`: read-only canonical `google/sagetv` repository
+- `opensagetv-fork`: read-only intermediate `OpenSageTV/sagetv` comparison
 
 ## Upstream review staging
 
-Fourteen focused `upstream-review/*` branches are published on the Vibe fork.
+Fourteen focused `sagetv-review/*` branches are published on the Vibe fork.
 They cover the Linux launcher, network encoder discovery, native GCC/64-bit
 compatibility, source-clean builds, Ubuntu 26/ImageLoader modernization,
 shutdown hardening, imported metadata repair, four independent DVD correctness
@@ -154,12 +155,13 @@ branch remains only as a superseded reference. Exact branch names, commits,
 validation, dependencies, and exclusions are recorded in
 `docs/UPSTREAM_EVALUATION.md`.
 
-After explicit approval, six independent pull requests were opened against
-`OpenSageTV/sagetv:master`: #1 Linux launcher, #2 network encoder identity,
-#3 MiniClient discovery interface, #4 source-clean builds, #5 DVD VM safety,
-and #6 DVD path normalization. Upstream currently reports no automated checks
-on those PR heads, so their documented local gates remain the available
-evidence. The other review branches have not been submitted.
+All fourteen independent pull requests are now opened against canonical
+`google/sagetv:master`: #516 Linux launcher, #517 network encoder identity,
+#518 MiniClient discovery interface, #519 source-clean builds, #520 DVD VM
+safety, #521 DVD path normalization, and drafts #522-#529 for the remaining
+validation-, protocol-, and modernization-dependent topics. Their documented
+local gates remain part of the review evidence. The mistaken pull requests
+against intermediate fork `OpenSageTV/sagetv` were closed as superseded.
 
 The review branches must not be merged as one omnibus change. Generic fixes are independent;
 protocol, timing, metadata, and DVD behavior retain their explicit validation
@@ -170,7 +172,7 @@ separate plugin and physical-disc integration evidence.
 The fork exists publicly with inherited upstream history retained on `master`
 and reviewed Vibe work on the default `main` branch. Complete source, Docker,
 test, package, and independent-checkout gates passed before `main` was
-published. Do not push to the original OpenSageTV repository and do not invoke
+published. Do not push directly to the canonical SageTV repository and do not invoke
 the inherited legacy deployment script from CI.
 
 ## Standard takeover

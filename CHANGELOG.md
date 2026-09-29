@@ -2,10 +2,11 @@
 
 ## Unreleased
 
-- Opened six independent upstream pull requests for the ready Linux launcher,
-  network encoder identity, MiniClient discovery-interface, source-clean build,
-  DVD VM safety, and DVD path-normalization topics. Validation-dependent and
-  protocol branches remain staged on the Vibe fork and were not submitted.
+- Rebased all fourteen isolated upstream topics onto current canonical
+  `google/sagetv:master` and opened SageTV Core pull requests #516-#529. The six
+  ready topics are review-ready; the eight validation-, protocol-, and
+  modernization-dependent topics remain drafts. Closed the mistaken duplicate
+  submissions against the intermediate `OpenSageTV/sagetv` fork.
 
 - Replaced the Core-owned `MiniDVDStreamTranscoder` MIM/FFmpeg process bridge
   with the provider-neutral `DVDStreamTransformProvider` SPI. Providers are
@@ -17,12 +18,12 @@
   in-memory provider test proves the Core contract without external software.
   The generic transformed transport is `dvd_mpegts_v1`; the former MIM-specific
   token and policy value are no longer emitted.
-- Prepared and published fourteen focused `upstream-review/*` branches from the
-  current OpenSageTV merge base. Generic Linux, network, native, build,
+- Prepared and published fourteen focused `sagetv-review/*` branches from the
+  current canonical SageTV merge base. Generic Linux, network, native, build,
   ImageLoader, shutdown, metadata, and DVD fixes are isolated from the optional
   MiniClient capability proposal. The provider-neutral DVD transform is an
-  explicit six-commit stack at `upstream-review/dvd-transform-provider`, not a
-  standalone patch. No upstream pull request was opened. The external MIM/
+  explicit six-commit stack at `sagetv-review/dvd-transform-provider`, not a
+  standalone patch. The external MIM/
   FFmpeg implementation, Vibe CI/release tooling, commissioning controls, and
   container policy remain outside Core upstream review.
 
@@ -78,8 +79,8 @@
   triggers to the published Vibe `main` branch. The workflow validates policy,
   shell syntax, and absence of generated/private state; it never deploys or
   publishes artifacts.
-- Preserved this repository as the `opensagetv-vibe-core` GitHub fork of
-  `OpenSageTV/sagetv`, documented upstream/release boundaries, indexed bundled
+- Preserved this repository as the `opensagetv-vibe-core` GitHub fork in the
+  canonical `google/sagetv` network, documented upstream/release boundaries, indexed bundled
   third-party licenses, and replaced the inherited Ubuntu 22/legacy deployment
   workflow with read-only repository checks. GitHub branch builds can no longer
   publish to or tag the historical project.

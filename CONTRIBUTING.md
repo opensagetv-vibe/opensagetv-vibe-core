@@ -1,6 +1,7 @@
 # Contributing to OpenSageTV Vibe Core
 
-This project is a compatibility-focused fork of `OpenSageTV/sagetv`. Keep
+This project is a compatibility-focused fork in the canonical
+`google/sagetv` SageTV fork network. Keep
 changes narrowly scoped, preserve existing SageTV/JNI/protocol behavior unless
 a documented modernization requires a change, and retain Java 11 compatibility.
 
@@ -42,5 +43,8 @@ the generated report.
 ## Upstream relationship
 
 Use `origin` for `opensagetv-vibe/opensagetv-vibe-core` and a read-only
-`upstream` remote for `OpenSageTV/sagetv`. Keep modernization commits reviewable
-and avoid mixing unrelated formatting or application-behavior changes.
+`upstream` remote for `google/sagetv`. The immediate GitHub parent
+`OpenSageTV/sagetv` may be retained as a read-only historical comparison
+remote, but do not target it for Core pull requests. Keep modernization commits
+reviewable and avoid mixing unrelated formatting or application-behavior
+changes.
