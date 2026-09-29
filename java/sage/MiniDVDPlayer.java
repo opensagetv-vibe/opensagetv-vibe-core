@@ -23,6 +23,15 @@ import sage.dvd.dsi_t;
 public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
 {
   protected static final long GUESS_VALIDITY_DURATION = 1000;
+  /**
+   * Give an asynchronous DVD transform reader one scheduler slice after each
+   * input write. A zero-time poll lets a fast producer fill its bounded output
+   * queue between polls; the provider then blocks on output while the DVD VM
+   * blocks on input, so no bytes ever reach the MiniClient. Ten milliseconds
+   * is a maximum wait (not a fixed delay) and returns immediately whenever
+   * transformed output is already available.
+   */
+  private static final long DISC_TRANSFORM_OUTPUT_WAIT_MILLIS = 10;
   public static final int MEDIACMD_INIT = 0;
   public static final int MEDIACMD_DEINIT = 1;
   public static final int MEDIACMD_OPENURL = 16;
@@ -453,6 +462,15 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
         addYieldDecoderLock();
         synchronized (decoderLock)
         {
+          // The transformed-output loop can keep producing chunks as quickly
+          // as the MiniClient accepts them. Close that finite provider session
+          // before the socket STOP so FFmpeg/MIM cannot refill its queue while
+          // this control operation owns decoderLock. pushDiscTransformOutput()
+          // observes shouldYieldDecoderLock() between chunks, which bounds the
+          // time required to acquire this monitor. The provider close contract
+          // terminates its child process and unblocks pending reads.
+          closeDiscTransform();
+          discTransformActive = false;
           stopPush0(ptr);
           removeYieldDecoderLock();
           decoderLock.notifyAll();
@@ -1221,7 +1239,7 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
                   if (discTransformActive)
                   {
                     pushed = writeDiscTransformInput(javaBuff, 0, readBufferSize) &&
-                        pushDiscTransformOutput(flags, 0);
+                        pushDiscTransformOutput(flags, DISC_TRANSFORM_OUTPUT_WAIT_MILLIS);
                   }
                   else
                   {
@@ -1871,9 +1889,22 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
     boolean first = true;
     try
     {
+      // Do not remove an output packet from the provider while a player
+      // control operation is already waiting for decoderLock. Once a packet
+      // has been polled it must be sent exactly once; after that single
+      // bounded socket write, yield before polling another packet.
+      if (shouldYieldDecoderLock())
+        return true;
       byte[] chunk = discTransform.pollOutput(firstWaitMillis);
       while (chunk != null)
       {
+        // STOP/seek/pause/media-time queries must not starve behind a transform
+        // whose producer continuously refills the output queue. The caller is
+        // already holding decoderLock; finish the one packet already removed
+        // from the provider, then yield before polling again. This bounds the
+        // wait without dropping transformed bytes during pause, seek, or a
+        // media-time query. stop() then closes the transform generation before
+        // sending MEDIACMD_STOP.
         while (freeSpace >= 0 && freeSpace < chunk.length)
         {
           if (!pushBuffer0(ptr, null, 0))
@@ -1887,6 +1918,8 @@ public class MiniDVDPlayer implements DVDMediaPlayer, MiniDVDPlayerIdentifier
         if (!pushBuffer0(ptr, java.nio.ByteBuffer.wrap(chunk), first ? firstFlags : 0))
           return false;
         first = false;
+        if (shouldYieldDecoderLock())
+          return true;
         chunk = discTransform.pollOutput(0);
       }
       return true;
