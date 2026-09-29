@@ -169,10 +169,12 @@ validation, dependencies, and exclusions are recorded in
 `docs/UPSTREAM_EVALUATION.md`.
 
 The canonical set has been re-triaged for SageTV's maintenance state. Only
-#519 source-clean builds and #521 DVD path normalization remain open and ready
-for individual review. #516-#517 and #525-#529, including #526, are open drafts
+#519 source-clean builds remain open and ready for individual review. Its
+unrelated `.gitattributes` policy was removed after maintainer review; the
+focused `compileJava` reproduction restores an identical `SageConstants.java`
+and leaves no backup. #516-#517 and #525-#529, including #526, are open drafts
 with explicit container, reproduction, physical, protocol/design, or
-platform-matrix prerequisites. #518, #520, and #522-#524 are closed after the
+platform-matrix prerequisites. #518 and #520-#524 are closed after the
 audit found behavior already present
 upstream, no reproduced user failure, an incomplete physical gate, or
 Vibe-specific policy. The surviving descriptions record concrete benefit,

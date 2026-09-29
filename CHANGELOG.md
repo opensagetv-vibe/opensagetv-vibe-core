@@ -8,12 +8,24 @@
   explicit supported-platform matrix rather than relegating the changes to
   Vibe-only container policy.
 
+- Removed the unrelated repository-wide line-ending policy from canonical
+  #519 after maintainer review. The PR now changes only `build.gradle`; focused
+  `compileJava` validation restored a byte-identical `SageConstants.java` and
+  left no backup. Audited every other open PR and removed the only other
+  `.gitattributes` policy from draft #529 as well.
+- Expanded the canonical pilot gate to require the real upstream `build` job
+  in addition to `check-changes` and `cla/google` before another PR may be
+  promoted or submitted.
+- Closed #521 after tracing its parent-disc-root case to external exact-path
+  commissioning rather than ordinary SageTV import/playback. The stock-
+  compatible Core MCP plugin already resolves parent roots to the indexed
+  `VIDEO_TS` MediaFile before using the public API, so no Core change is needed.
 - Re-triaged the canonical Core PR set for SageTV's maintenance state. Only
-  #519 and #521 remain ready for individual review; #516-#517 and #525-#529
+  #519 remains ready for individual review; #516-#517 and #525-#529
   remain drafts with explicit missing evidence/design gates. Reopened #516 as
   an accurately scoped container-configurable launcher proposal after proving
   the current non-root Ubuntu runtime cannot write its old `/var/run` PID
-  default. Closed #518, #520, and #522-#524 after the audit found already-
+  default. Closed #518 and #520-#524 after the audit found already-
   present upstream behavior, no reproduced user failure, incomplete physical
   evidence, or Vibe-specific policy. Updated surviving PR descriptions with
   concrete impact, reproduction/evidence, risk, and disposition. The preflight

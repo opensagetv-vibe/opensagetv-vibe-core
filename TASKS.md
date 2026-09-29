@@ -19,11 +19,11 @@ in `CHANGELOG.md` and `HANDOFF.md`.
 - [ ] Address important remaining compiler/Gradle warnings in narrowly scoped,
   tested changes without enabling global `-Werror`.
 - [ ] Track the maintenance-triaged canonical Core proposals individually.
-  Only #519 (source-clean build state) and #521 (DVD path normalization) remain
-  ready for review. #516-#517 and #525-#529, including #526, remain drafts
+  Only #519 (source-clean build state) remains ready for review. #516-#517 and
+  #525-#529, including #526, remain drafts
   pending focused container evidence, reproduction, protocol/design approval,
-  physical DVD evidence, or a split native/platform matrix. #518, #520, and
-  #522-#524 are closed because the audit found behavior already present
+  physical DVD evidence, or a split native/platform matrix. #518, #520-#524
+  are closed because the audit found behavior already present
   upstream, no reproduced user failure, an incomplete physical gate, or
   Vibe-specific policy. All current open PRs pass `check-changes` and
   `cla/google`; do not promote or recreate a closed/draft topic without the

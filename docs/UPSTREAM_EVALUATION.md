@@ -88,12 +88,12 @@ in comments.
 | `sagetv-review/network-encoder-identity` | `c953de27` | complete Java test suite | Draft: needs an affected installation and before/after scan evidence |
 | `sagetv-review/miniclient-discovery-interface` | `57ce81f6` | complete Java test suite | Closed: upstream already replies through the receiving socket; no demonstrated benefit remained |
 | `sagetv-review/native-gcc15-64bit` | `d0d9de2a` | Java suite; native build reaches the known legacy bundled-JPEG baseline failure | Draft: split by native subsystem and prove supported-platform behavior |
-| `sagetv-review/build-source-clean` | `f6bd5c35` | complete Java suite; source restored after compile | Ready for individual review |
-| `sagetv-review/ubuntu26-imageloader` | `1c134e17` | Java, all native libraries, JNI/ELF, ImageLoader fixtures, packaging, and smoke gate | Draft: requires an upstream platform/library decision |
+| `sagetv-review/build-source-clean` | `089984ed` | complete Java suite; focused `compileJava` restores identical source and removes its backup | Ready for individual review; unrelated line-ending policy removed |
+| `sagetv-review/ubuntu26-imageloader` | `538d9527` | Java, all native libraries, JNI/ELF, ImageLoader fixtures, packaging, and smoke gate | Draft: requires an upstream platform/library decision; line-ending policy removed |
 | `sagetv-review/shutdown-hardening` | `4de3ed64` | complete Java suite | Closed: no reproduced shutdown failure or failure-injection evidence |
 | `sagetv-review/imported-metadata-repair` | `bbc2b22c` | focused Java tests | Closed: observed only on a modified server; no stock-server reproduction |
 | `sagetv-review/dvd-vm-safety` | `a188a3d9` | focused Java tests | Closed: synthetic coverage only; no affected disc or user-visible failure |
-| `sagetv-review/dvd-path-normalization` | `eef4c917` | focused Java tests | Ready for individual review |
+| `sagetv-review/dvd-path-normalization` | `eef4c917` | focused Java tests | Closed: commissioning-only parent-root input is already normalized by the stock-compatible plugin |
 | `sagetv-review/dvd-runtime-correctness` | `6dedff4f` | focused Java tests | Draft: observed issue exists, but the patch must be reduced and physically validated |
 | `sagetv-review/dvd-main-feature-selection` | `40a6ddf8` | complete Java suite | Closed: Vibe-specific policy heuristic without adequate disc-corpus evidence |
 | `sagetv-review/miniclient-capability-protocol` | `175ed345` | focused Java protocol tests | Draft: protocol/design review required before implementation review |
@@ -106,7 +106,7 @@ Canonical SageTV pull requests opened on 2026-09-29 after explicit approval:
 - [#518 MiniClient discovery interface (closed)](https://github.com/google/sagetv/pull/518)
 - [#519 Source-clean build state (ready)](https://github.com/google/sagetv/pull/519)
 - [#520 DVD VM link safety (closed)](https://github.com/google/sagetv/pull/520)
-- [#521 DVD path normalization (ready)](https://github.com/google/sagetv/pull/521)
+- [#521 DVD path normalization (closed)](https://github.com/google/sagetv/pull/521)
 - [#522 Shutdown completion hardening (closed)](https://github.com/google/sagetv/pull/522)
 - [#523 Invalid imported-media metadata repair (closed)](https://github.com/google/sagetv/pull/523)
 - [#524 DVD main-feature selection (closed)](https://github.com/google/sagetv/pull/524)
@@ -118,14 +118,14 @@ Canonical SageTV pull requests opened on 2026-09-29 after explicit approval:
 
 Canonical SageTV's `check-changes` and Google CLA checks pass on every open
 pull request. Following maintainer feedback about SageTV's maintenance state,
-the set was reduced to two small ready changes, seven explicit drafts, and five
+the set was reduced to one small ready change, seven explicit drafts, and six
 closed proposals. Closed branches remain as auditable references but must not
 be reopened without a reproduced user-visible problem, before/after evidence,
 focused regression coverage, and a patch whose description exactly matches its
 scope.
 
-The two ready pull requests are #519 and #521. PRs #516-#517 and #525-#529
-remain drafts. PRs #518, #520, and #522-#524 are closed. The launcher and
+The only ready pull request is #519. PRs #516-#517 and #525-#529 remain drafts.
+PRs #518 and #520-#524 are closed. The launcher and
 Ubuntu/GCC/native
 changes in #528-#529 are still intended for canonical SageTV; draft status
 means they must be split and supported by an upstream platform matrix, not that
@@ -164,11 +164,15 @@ The discovery proposal was closed because canonical upstream already receives
 and replies through `miniDiscoverySocket`; the remaining explicit reuse/bind
 change had no demonstrated user benefit.
 
-### DVD path handling — Ready; other DVD runtime changes — Closed / Draft
+### DVD path handling — Closed; other DVD runtime changes — Closed / Draft
 
-The remaining small upstream candidate is:
-
-- Normalize disc roots, `VIDEO_TS`, and paths inside `VIDEO_TS`.
+The path-normalization proposal was closed after maintainer review. Its parent-
+disc-root input came from external exact-path commissioning rather than a
+reproduced normal SageTV import/playback failure. Stock SageTV intentionally
+indexes `VIDEO_TS`, and the stock-compatible Core MCP plugin already resolves a
+commissioning parent root to that indexed MediaFile before calling the public
+API. The focused Core test proved only the proposed normalization, not a user
+problem, so changing `Wizard` would add risk without demonstrated benefit.
 
 The PGC-link guard and longest-title main-feature policy were closed because
 they lacked affected-disc evidence or were Vibe-specific policy. The broader
@@ -283,16 +287,15 @@ local video output without replacing or seeking the server stream.
 ## Proposed pull-request sequence
 
 1. Review source-clean build state (#519) independently.
-2. Review DVD path normalization (#521) independently.
-3. Keep OpenDCT identity (#517) draft until an affected installation supplies
+2. Keep OpenDCT identity (#517) draft until an affected installation supplies
    before/after evidence.
-4. Reduce the DVD runtime draft (#526) to the smallest fix for the reproduced
+3. Reduce the DVD runtime draft (#526) to the smallest fix for the reproduced
    negative-skip problem and add physical evidence.
-5. Discuss the MiniClient capability contract (#525) before reviewing any
+4. Discuss the MiniClient capability contract (#525) before reviewing any
    dependent DVD provider work (#527).
-6. Split native/compiler and ImageLoader modernization (#528-#529) by subsystem
+5. Split native/compiler and ImageLoader modernization (#528-#529) by subsystem
    only after upstream agrees on its supported platform and library matrix.
-7. Do not reopen closed topics without new user-visible evidence.
+6. Do not reopen closed topics without new user-visible evidence.
 
 ## Minimal `sage.jar` target
 

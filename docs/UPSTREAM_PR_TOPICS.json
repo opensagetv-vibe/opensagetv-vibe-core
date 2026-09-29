@@ -11,6 +11,7 @@
     "OpenSageTV/sagetv"
   ],
   "required_pilot_checks": [
+    "build",
     "check-changes",
     "cla/google"
   ],
@@ -20,7 +21,7 @@
     {"pr": 518, "state": "CLOSED", "draft": false, "branch": "sagetv-review/miniclient-discovery-interface", "reference_branch": "upstream-review/miniclient-discovery-interface"},
     {"pr": 519, "state": "OPEN", "pilot": true, "draft": false, "branch": "sagetv-review/build-source-clean", "reference_branch": "upstream-review/build-source-clean"},
     {"pr": 520, "state": "CLOSED", "draft": false, "branch": "sagetv-review/dvd-vm-safety", "reference_branch": "upstream-review/dvd-vm-safety"},
-    {"pr": 521, "state": "OPEN", "draft": false, "branch": "sagetv-review/dvd-path-normalization", "reference_branch": "upstream-review/dvd-path-normalization"},
+    {"pr": 521, "state": "CLOSED", "draft": false, "branch": "sagetv-review/dvd-path-normalization", "reference_branch": "upstream-review/dvd-path-normalization"},
     {"pr": 522, "state": "CLOSED", "draft": true, "branch": "sagetv-review/shutdown-hardening", "reference_branch": "upstream-review/shutdown-hardening"},
     {"pr": 523, "state": "CLOSED", "draft": true, "branch": "sagetv-review/imported-metadata-repair", "reference_branch": "upstream-review/imported-metadata-repair"},
     {"pr": 524, "state": "CLOSED", "draft": true, "branch": "sagetv-review/dvd-main-feature-selection", "reference_branch": "upstream-review/dvd-main-feature-selection"},

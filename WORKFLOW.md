@@ -59,8 +59,8 @@ Then run:
 python3 tests/upstream-review/preflight.py --require-pilot-green
 ```
 
-Do not open any remaining PR until both `check-changes` and `cla/google` pass on
-the pilot. Submit the rest one at a time and stop immediately on a failed
+Do not open any remaining PR until `build`, `check-changes`, and `cla/google`
+all pass on the pilot. Submit the rest one at a time and stop immediately on a failed
 required check. This makes a new external-account problem produce at most one
 failure notification instead of one notification per topic.
 
