@@ -2,6 +2,22 @@
 
 ## Unreleased
 
+- Clarified that canonical PRs #528-#529 remain active upstream modernization
+  work. The working Vibe Ubuntu 26 environment and GPU-driver compatibility
+  goal are retained; draft status requires smaller reviewable patches and an
+  explicit supported-platform matrix rather than relegating the changes to
+  Vibe-only container policy.
+
+- Re-triaged the canonical Core PR set for SageTV's maintenance state. Only
+  #519 and #521 remain ready for individual review; #516-#517 and #525-#529
+  remain drafts with explicit missing evidence/design gates. Reopened #516 as
+  an accurately scoped container-configurable launcher proposal after proving
+  the current non-root Ubuntu runtime cannot write its old `/var/run` PID
+  default. Closed #518, #520, and #522-#524 after the audit found already-
+  present upstream behavior, no reproduced user failure, incomplete physical
+  evidence, or Vibe-specific policy. Updated surviving PR descriptions with
+  concrete impact, reproduction/evidence, risk, and disposition. The preflight
+  now verifies closed dispositions and uses open #519 as its sole pilot.
 - Added a fail-closed canonical upstream PR preflight and topic manifest. It
   verifies target/base, current ancestry, remote heads, reviewed patch shape,
   author/committer identity, forbidden-target duplicates, GitHub compare state,
@@ -12,12 +28,11 @@
   verified GitHub noreply identity without changing their source patches.
 
 - Rebased all fourteen isolated upstream topics onto current canonical
-  `google/sagetv:master` and opened SageTV Core pull requests #516-#529. The six
-  ready topics are review-ready; the eight validation-, protocol-, and
-  modernization-dependent topics remain drafts. Closed the mistaken duplicate
-  submissions against the intermediate `OpenSageTV/sagetv` fork. Canonical
-  `check-changes` passes on every replacement; Google's external CLA
-  authorization remains required before merge.
+  `google/sagetv:master` and opened SageTV Core pull requests #516-#529. This
+  initial submission was subsequently reduced by the maintenance triage above.
+  Closed the mistaken duplicate submissions against the intermediate
+  `OpenSageTV/sagetv` fork. Canonical `check-changes` and Google CLA now pass on
+  every remaining open proposal.
 
 - Replaced the Core-owned `MiniDVDStreamTranscoder` MIM/FFmpeg process bridge
   with the provider-neutral `DVDStreamTransformProvider` SPI. Providers are

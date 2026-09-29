@@ -37,6 +37,12 @@ Before pushing or tagging a release candidate:
 
 ## Canonical upstream pull-request gate
 
+Never open an upstream Core PR merely because static or AI-assisted analysis
+found a plausible defect. Before staging a topic, record the affected user or
+maintenance behavior, repeatable reproduction, before/after evidence, narrow
+compatibility boundary, and remaining physical/platform gaps. If there is no
+demonstrated benefit, keep the change out of the upstream merge queue.
+
 Never open an upstream Core PR batch directly. First run:
 
 ```bash
@@ -57,6 +63,11 @@ Do not open any remaining PR until both `check-changes` and `cla/google` pass on
 the pilot. Submit the rest one at a time and stop immediately on a failed
 required check. This makes a new external-account problem produce at most one
 failure notification instead of one notification per topic.
+
+The topic manifest records `OPEN` and `CLOSED` dispositions. Closed topics stay
+auditable so a later automated run cannot silently reopen them. Only one open
+topic may be the pilot, and draft protocol/modernization topics are not merge
+requests until their documented evidence and design gates pass.
 
 The GitHub Actions workflow performs read-only repository checks. It does not
 replace the Ubuntu 26 Docker build and has no release credentials or deployment

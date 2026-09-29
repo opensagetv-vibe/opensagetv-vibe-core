@@ -1,5 +1,17 @@
 # Core handoff
 
+## Canonical Ubuntu/container modernization is the top priority (2026-09-29)
+
+Do not remove or reclassify the newer-Ubuntu work as Vibe-only. Canonical
+SageTV PRs #516, #528, and #529 remain open drafts because SageTV needs the applicable
+GCC/64-bit, native-library, ImageLoader, and reproducible-build changes to run
+on a current Ubuntu base with current GPU kernel/userspace drivers. PR #516 is
+now accurately scoped to the non-root PID path and container-provided launcher
+settings; it no longer claims to change the working directory. The Vibe
+Ubuntu 26 container and complete build/runtime gates remain the integration
+proof. The next upstream step is to split the broad stacks into independently
+reviewable maintenance changes, not to withdraw the requirement.
+
 ## Provider-neutral DVD transform SPI (2026-09-20)
 
 Core no longer owns or launches a MIM/FFmpeg DVD transcoder. The public
@@ -21,10 +33,11 @@ test-only in-memory provider and no external executable. The resulting
 `a8788a30b52f200d62970874768b3b727d35aeccbe9dff4d90d4de7c65aee9bd`.
 
 The canonical upstream review source is published to the Vibe fork as
-`sagetv-review/dvd-transform-provider` at `bf211a8c`. It is a deliberate
+`sagetv-review/dvd-transform-provider` at `3b8d0cc6`. It is a deliberate
 six-commit stack over `e95c495d`: the four DVD correctness topics, MiniClient
 capability negotiation, and finally the provider-neutral SPI. Its complete
-Java suite and `sageJar` gate pass. No OpenSageTV pull request was opened.
+Java suite and `sageJar` gate pass. Canonical `google/sagetv` PR #527 remains
+an open draft behind the capability/design and physical-provider gates.
 
 ## Functional MiniClient capability names (2026-09-20)
 
@@ -155,16 +168,18 @@ branch remains only as a superseded reference. Exact branch names, commits,
 validation, dependencies, and exclusions are recorded in
 `docs/UPSTREAM_EVALUATION.md`.
 
-All fourteen independent pull requests are now opened against canonical
-`google/sagetv:master`: #516 Linux launcher, #517 network encoder identity,
-#518 MiniClient discovery interface, #519 source-clean builds, #520 DVD VM
-safety, #521 DVD path normalization, and drafts #522-#529 for the remaining
-validation-, protocol-, and modernization-dependent topics. Their documented
-local gates remain part of the review evidence. The mistaken pull requests
-against intermediate fork `OpenSageTV/sagetv` were closed as superseded.
-Canonical `check-changes` passes on all fourteen replacements. Google's CLA
-check fails on all fourteen and requires contributor or organization
-authorization before merge; it cannot be corrected by changing project code.
+The canonical set has been re-triaged for SageTV's maintenance state. Only
+#519 source-clean builds and #521 DVD path normalization remain open and ready
+for individual review. #516-#517 and #525-#529, including #526, are open drafts
+with explicit container, reproduction, physical, protocol/design, or
+platform-matrix prerequisites. #518, #520, and #522-#524 are closed after the
+audit found behavior already present
+upstream, no reproduced user failure, an incomplete physical gate, or
+Vibe-specific policy. The surviving descriptions record concrete benefit,
+evidence, risk, and disposition. All current open PRs pass both canonical
+`check-changes` and `cla/google`; the submitting account's individual CLA is
+linked successfully. The mistaken pull requests against intermediate fork
+`OpenSageTV/sagetv` remain closed as superseded.
 
 The review branches must not be merged as one omnibus change. Generic fixes are independent;
 protocol, timing, metadata, and DVD behavior retain their explicit validation

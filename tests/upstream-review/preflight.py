@@ -111,11 +111,15 @@ def audit_topic(manifest: dict[str, Any], topic: dict[str, Any]) -> dict[str, An
 
     pr_number = topic.get("pr")
     if pr_number:
+        expected_state = topic.get("state", "OPEN")
         pull = gh_json(
             "pr", "view", str(pr_number), "--repo", target,
             "--json", "state,isDraft,baseRefName,headRefName,headRefOid,url",
         )
-        require(pull["state"] == "OPEN", f"PR #{pr_number}: not open")
+        require(
+            pull["state"] == expected_state,
+            f"PR #{pr_number}: expected state {expected_state}, got {pull['state']}",
+        )
         require(pull["baseRefName"] == base, f"PR #{pr_number}: wrong base")
         require(pull["headRefName"] == branch, f"PR #{pr_number}: wrong head branch")
         require(pull["headRefOid"] == local_sha, f"PR #{pr_number}: wrong head commit")
@@ -126,13 +130,17 @@ def audit_topic(manifest: dict[str, Any], topic: dict[str, Any]) -> dict[str, An
         "head": local_sha,
         "ahead": ahead,
         "pr": pr_number,
+        "state": topic.get("state", "OPEN"),
         "status": "PASS",
     }
 
 
 def require_pilot_green(manifest: dict[str, Any]) -> dict[str, Any]:
     target = manifest["target_repository"]
-    pilots = [topic for topic in manifest["topics"] if topic.get("pilot")]
+    pilots = [
+        topic for topic in manifest["topics"]
+        if topic.get("pilot") and topic.get("state", "OPEN") == "OPEN"
+    ]
     require(len(pilots) == 1, "manifest must define exactly one pilot topic")
     pilot = pilots[0]
     require(pilot.get("pr"), "pilot PR has not been created")

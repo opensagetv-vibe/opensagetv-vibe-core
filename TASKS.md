@@ -18,12 +18,26 @@ in `CHANGELOG.md` and `HANDOFF.md`.
   stock `.175` remains untouched.
 - [ ] Address important remaining compiler/Gradle warnings in narrowly scoped,
   tested changes without enabling global `-Werror`.
-- [ ] Track review of canonical `google/sagetv` PRs #516-#529 and collect the
-  physical, cross-platform, or design evidence required to promote the eight
-  draft topics when their gates pass. Keep the six ready topics independent;
-  do not represent draft protocol or validation work as accepted behavior.
-  Complete Google's contributor/organization CLA authorization; the canonical
-  `check-changes` gate passes, but `cla/google` currently blocks every PR.
+- [ ] Track the maintenance-triaged canonical Core proposals individually.
+  Only #519 (source-clean build state) and #521 (DVD path normalization) remain
+  ready for review. #516-#517 and #525-#529, including #526, remain drafts
+  pending focused container evidence, reproduction, protocol/design approval,
+  physical DVD evidence, or a split native/platform matrix. #518, #520, and
+  #522-#524 are closed because the audit found behavior already present
+  upstream, no reproduced user failure, an incomplete physical gate, or
+  Vibe-specific policy. All current open PRs pass `check-changes` and
+  `cla/google`; do not promote or recreate a closed/draft topic without the
+  maintenance evidence required by `WORKFLOW.md`.
+- [ ] Make the canonical/current-Ubuntu server and Vibe container path the top
+  priority. Add a focused launcher regression harness for #516 covering root
+  and non-root PID paths, optional `activkey`, environment overrides, and
+  `sagesettings` precedence; then supply the evidence needed to promote the
+  corrected container-configurable launcher proposal.
+- [ ] Keep #528-#529 active as canonical SageTV modernization proposals. Split
+  the GCC/64-bit, ImageLoader/native-library, and reproducible Ubuntu build
+  work into the smallest reviewable changes while retaining the demonstrated
+  Ubuntu 26 build/runtime goal needed for current GPU driver stacks. Draft
+  status is a scope/evidence gate, not a decision to keep this work Vibe-only.
 - [ ] Replace Core's temporary automatic XMLTV importer discovery/property
   repair with a stock-compatible SageTV Standard plugin migration, then remove
   the temporary Core policy after existing installations have a tested upgrade
