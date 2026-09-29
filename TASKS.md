@@ -22,6 +22,8 @@ in `CHANGELOG.md` and `HANDOFF.md`.
   physical, cross-platform, or design evidence required to promote the eight
   draft topics when their gates pass. Keep the six ready topics independent;
   do not represent draft protocol or validation work as accepted behavior.
+  Complete Google's contributor/organization CLA authorization; the canonical
+  `check-changes` gate passes, but `cla/google` currently blocks every PR.
 - [ ] Replace Core's temporary automatic XMLTV importer discovery/property
   repair with a stock-compatible SageTV Standard plugin migration, then remove
   the temporary Core policy after existing installations have a tested upgrade

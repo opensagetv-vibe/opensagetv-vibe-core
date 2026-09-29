@@ -6,7 +6,9 @@
   `google/sagetv:master` and opened SageTV Core pull requests #516-#529. The six
   ready topics are review-ready; the eight validation-, protocol-, and
   modernization-dependent topics remain drafts. Closed the mistaken duplicate
-  submissions against the intermediate `OpenSageTV/sagetv` fork.
+  submissions against the intermediate `OpenSageTV/sagetv` fork. Canonical
+  `check-changes` passes on every replacement; Google's external CLA
+  authorization remains required before merge.
 
 - Replaced the Core-owned `MiniDVDStreamTranscoder` MIM/FFmpeg process bridge
   with the provider-neutral `DVDStreamTransformProvider` SPI. Providers are

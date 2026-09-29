@@ -162,6 +162,9 @@ safety, #521 DVD path normalization, and drafts #522-#529 for the remaining
 validation-, protocol-, and modernization-dependent topics. Their documented
 local gates remain part of the review evidence. The mistaken pull requests
 against intermediate fork `OpenSageTV/sagetv` were closed as superseded.
+Canonical `check-changes` passes on all fourteen replacements. Google's CLA
+check fails on all fourteen and requires contributor or organization
+authorization before merge; it cannot be corrected by changing project code.
 
 The review branches must not be merged as one omnibus change. Generic fixes are independent;
 protocol, timing, metadata, and DVD behavior retain their explicit validation

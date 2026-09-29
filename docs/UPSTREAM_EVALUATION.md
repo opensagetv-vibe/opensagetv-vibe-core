@@ -68,9 +68,11 @@ Canonical SageTV pull requests opened on 2026-09-29 after explicit approval:
 - [#528 GCC 15 and 64-bit native compatibility (draft)](https://github.com/google/sagetv/pull/528)
 - [#529 Ubuntu 26 and ImageLoader modernization (draft)](https://github.com/google/sagetv/pull/529)
 
-The upstream repository currently reports no automated checks for these head
-branches. Their recorded local gates therefore remain the available validation
-evidence until upstream review or CI adds another result.
+Canonical SageTV's `check-changes` workflow passes on all fourteen head
+branches. Google's CLA check currently fails uniformly and must be completed by
+the submitting account or its organization before any topic can merge; this is
+an external contributor-authorization gate, not a source or test failure. The
+recorded local gates remain the functional validation evidence.
 
 Every current, non-superseded review branch has now been submitted. The eight
 validation-, native-modernization-, metadata-, shutdown-, and protocol-dependent
