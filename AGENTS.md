@@ -1,8 +1,9 @@
 # OpenSageTV Vibe Core contributor rules
 
 Read `README.md`, `HANDOFF.md`, `TASKS.md`, `WORKFLOW.md`, and the Ubuntu 26
-audit before changing Core. `TASKS.md` is the only local backlog. Remove
-completed work and record evidence in `CHANGELOG.md` and `HANDOFF.md`.
+audit before changing Core. `TASKS.md` is the only local backlog. Move
+completed work to its checklist change ledger and record release evidence in
+`CHANGELOG.md` and `HANDOFF.md`.
 
 Do not create prompt/review/per-version notes. Preserve SageTV/JNI ABI, Java 11,
 system-libpng behavior, LF executable files, and the one unified Docker
@@ -28,3 +29,13 @@ requires it, and document that reason and scope.
   expressed through the stock plugin/API boundary. Document the proven API
   gap, keep the extension optional and negotiated with a safe stock fallback,
   and verify older clients and installations remain unaffected.
+
+## Pre-commit task-list maintenance
+
+Immediately before every repository commit, clean `TASKS.md`: move every
+completed `[x]` item out of the active task sections and into
+`## Checklist change ledger`. Preserve stable IDs, acceptance evidence, order,
+and enough source/parent context to understand the result. Never delete
+completion history. Active task sections must contain unchecked work only;
+checked boxes may appear only inside the checklist change ledger. Regenerate
+the project manifest when the repository tracks one.

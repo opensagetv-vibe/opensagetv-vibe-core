@@ -1,7 +1,13 @@
 # OpenSageTV Vibe Core tasks
 
-This is the only active Core backlog. Completed work is removed and recorded
-in `CHANGELOG.md` and `HANDOFF.md`.
+> **Pre-commit task maintenance:** Immediately before every repository commit, move
+> completed `[x]` items out of active sections and into
+> `## Checklist change ledger`. Preserve IDs, evidence, and context; never
+> discard completion history. Active sections contain unchecked work only.
+
+This is the only active Core backlog. Completed work moves to the checklist
+change ledger; release evidence is also recorded in `CHANGELOG.md` and
+`HANDOFF.md`.
 
 - [ ] Prove the opt-in repair for clearly invalid completed-import metadata on
   isolated server `.232`; it remains disabled by default because valid MKVs
@@ -42,10 +48,6 @@ in `CHANGELOG.md` and `HANDOFF.md`.
   repair with a stock-compatible SageTV Standard plugin migration, then remove
   the temporary Core policy after existing installations have a tested upgrade
   path.
-- [x] Stage and submit the provider-neutral DVD transform SPI as the explicit
-  stacked `sagetv-review/dvd-transform-provider` draft topic. The external
-  FFmpeg/MIM provider remains in its plugin repository; canonical PR #527 still
-  requires `DVD_DISC_*` protocol/design review before promotion.
 - [ ] Create `docs/CLIENT_MODERNIZATION_AUDIT.md` covering the Java
   MiniClient/PlaceShifter, native Linux MiniClient, Windows client,
   launchers/installers, renderer/player backends, protocols, dependencies, and
@@ -69,3 +71,19 @@ in `CHANGELOG.md` and `HANDOFF.md`.
 - [ ] Add shared malformed-input/protocol conformance tests and a cross-client
   media corpus covering completed, growing, circular, malformed, captioned,
   multilingual, and slow-network cases.
+
+## Checklist change ledger
+
+
+### Archived completed checklist items (2026-09-30)
+
+These completed items were moved from active task sections immediately
+before commit. Stable IDs, acceptance evidence, and source context are
+preserved; active sections contain unchecked work only.
+
+#### From `# OpenSageTV Vibe Core tasks`
+
+- [x] Stage and submit the provider-neutral DVD transform SPI as the explicit
+  stacked `sagetv-review/dvd-transform-provider` draft topic. The external
+  FFmpeg/MIM provider remains in its plugin repository; canonical PR #527 still
+  requires `DVD_DISC_*` protocol/design review before promotion.
