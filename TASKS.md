@@ -74,6 +74,11 @@ change ledger; release evidence is also recorded in `CHANGELOG.md` and
 
 ## Checklist change ledger
 
+- 2026-10-08 pre-commit source-sync review: only task-fix/stock-server workflow
+  policy changes; runtime Core source is unchanged. Completed entries remain
+  in this ledger and upstream/runtime acceptance stays open. Root order305
+  prioritizes the approved Android release; no native build/matrix repeat.
+
 
 ### Archived completed checklist items (2026-09-30)
 
