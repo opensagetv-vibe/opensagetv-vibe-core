@@ -1,5 +1,21 @@
 # Core handoff
 
+## Blu-ray BDMV transport commissioning (2026-10-15)
+
+A legal generated BDMV exposed a narrow Core transport bug: a pull-capable
+MiniClient caused `MiniPlayer` to send the BDMV directory through OPENURL, but
+the MediaServer can only Pull a byte-addressable file. Blu-ray already has a
+server-owned `BluRayStreamer`, so the correction excludes only `isBluRay()`
+from Pull selection and retains all other historical transport conditions.
+
+The focused test and `sageJar` build pass. The resulting JAR was installed only
+on isolated non-stock `.232` after the activity guard reported zero recordings,
+UI clients, and connected clients. Its SHA-256 is
+`7d9a60b602459de5cb8de4d349f88f10f5281b90ccd947ec181e6d4edc314259`.
+Shield playback, seek/pause and the client's ordinary-TS regression pass with
+the matching 192-byte-M2TS client deframer. Stock `.175` remains untouched and
+does not acquire BDMV support from this client-side change alone.
+
 ## Canonical Ubuntu/container modernization is the top priority (2026-09-29)
 
 Do not remove or reclassify the newer-Ubuntu work as Vibe-only. Canonical

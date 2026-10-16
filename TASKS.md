@@ -74,6 +74,23 @@ change ledger; release evidence is also recorded in `CHANGELOG.md` and
 
 ## Checklist change ledger
 
+- 2026-10-16 approved source refresh: focused Blu-ray transport TestNG cases
+  and sageJar compilation pass on JDK11. The current upstream divergence was
+  reviewed without merging/rebasing or opening new upstream PRs. Publish only
+  the already commissioned narrow BDMV transport source; no new Core binary
+  release, container replacement, stock-server change or native-matrix claim.
+
+- 2026-10-15 **EXT-002** commissioned Blu-ray/BDMV Push on isolated non-stock
+  `.232`. A legal self-generated BDMV proves that Pull cannot open a directory;
+  `MiniPlayer.shouldUsePullPlayback` now excludes only Blu-ray so the existing
+  `BluRayStreamer` owns it, while every ordinary transport decision is
+  unchanged. The focused regression test and `sageJar` build pass. Installed
+  `.232` Sage.jar SHA-256 is
+  `7d9a60b602459de5cb8de4d349f88f10f5281b90ccd947ec181e6d4edc314259`;
+  activity was independently zero before restart and the prior JAR is retained
+  under the component backup. Stock `.175` was not modified or restarted and
+  retains its documented BDMV Pull limitation.
+
 - 2026-10-08 pre-commit source-sync review: only task-fix/stock-server workflow
   policy changes; runtime Core source is unchanged. Completed entries remain
   in this ledger and upstream/runtime acceptance stays open. Root order305

@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Keep Blu-ray/BDMV MediaFiles on the existing server-owned Push streamer even
+  when a MiniClient supports Pull. A BDMV is a directory rather than a
+  byte-addressable MediaServer resource; ordinary file/HTTP/bandwidth transport
+  decisions remain unchanged and are protected by a focused unit test.
+
 - Clarified that canonical PRs #528-#529 remain active upstream modernization
   work. The working Vibe Ubuntu 26 environment and GPU-driver compatibility
   goal are retained; draft status requires smaller reviewable patches and an

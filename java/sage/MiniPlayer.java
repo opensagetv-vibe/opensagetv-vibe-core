@@ -21,6 +21,11 @@ package sage;
  */
 public class MiniPlayer implements DVDMediaPlayer
 {
+  static boolean shouldUsePullPlayback(boolean clientDoesPull, boolean bluRay)
+  {
+    return clientDoesPull && !bluRay;
+  }
+
   protected static final long GUESS_VALIDITY_DURATION = 1000;
   protected static final boolean ENABLE_DSM520_HACKS = Sage.getBoolean("enable_miniplayer_hacks", false);
 
@@ -952,7 +957,16 @@ public class MiniPlayer implements DVDMediaPlayer
 
       boolean useOriginalAudioTrack = true;
 
-      if (clientDoesPull && (httpls || pureLocal || !clientDoesMPEG2Push || !clientCanDoMpeg4 || uiBandwidthEstimate >= Sage.getInt("miniplayer/min_bandwidth_for_no_transcode", 2000000)))
+      // A Blu-ray MediaFile names a BDMV directory, not a byte-addressable
+      // media file. Sending that directory through OPENURL/Pull bypasses the
+      // existing BluRayStreamer and inevitably fails at the MediaServer OPEN
+      // boundary. Keep Blu-ray on the established server-owned Push path,
+      // where FastMpeg2Reader selects the requested title and joins its clips.
+      // This is intentionally limited to Blu-ray; ordinary files retain the
+      // historical transport decision unchanged.
+      if (shouldUsePullPlayback(clientDoesPull, currMF.isBluRay()) &&
+          (httpls || pureLocal || !clientDoesMPEG2Push || !clientCanDoMpeg4 ||
+              uiBandwidthEstimate >= Sage.getInt("miniplayer/min_bandwidth_for_no_transcode", 2000000)))
       {
         if (Sage.DBG) System.out.println("MiniPlayer is using Pull mode playback");
         // Pull mode is being used
